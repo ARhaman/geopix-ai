@@ -1,0 +1,1076 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GeoPix AI — Reservoir property models in hours, not days</title>
+<meta name="description" content="GeoPix AI translates facies models into porosity, permeability and water saturation maps using conditional GANs. Peer-reviewed method, open code, patent filed.">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="GeoPix AI — Reservoir property models in hours, not days">
+<meta property="og:description" content="Conditional GANs for subsurface property prediction. Peer-reviewed method, open code, patent filed.">
+<meta property="og:url" content="https://geopix-ai.com/">
+<meta property="og:image" content="https://geopix-ai.com/assets/og-card.png">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230A1628'/><rect x='6' y='7' width='7' height='5' fill='%23E8A33D'/><rect x='6' y='13' width='7' height='5' fill='%23E8A33D' opacity='.55'/><rect x='6' y='19' width='7' height='6' fill='%23E8A33D' opacity='.8'/><rect x='17' y='7' width='9' height='5' fill='%234FC4B8'/><rect x='17' y='13' width='9' height='5' fill='%233C8FC0'/><rect x='17' y='19' width='9' height='6' fill='%232E5E9E'/></svg>">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=Newsreader:opsz,wght@6..72,300;6..72,400;6..72,500&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --bg:#F3F4F7;
+    --bg-2:#FFFFFF;
+    --bg-3:#E9ECF1;
+    --ink:#0E1628;
+    --ink-2:#102140;
+    --facies:#E8A33D;
+    --facies-ink:#8F5B08;
+    --shale:#8A94A3;
+    --prop-1:#1F7A72;
+    --prop-2:#2E6FA8;
+    --prop-3:#24497A;
+    --text:#0E1628;
+    --text-dim:#55637A;
+    --rule:rgba(14,22,40,.16);
+    --rule-soft:rgba(14,22,40,.09);
+    --display:"Archivo", system-ui, sans-serif;
+    --body:"Newsreader", Georgia, serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:var(--body);
+    font-size:18px;
+    line-height:1.62;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit}
+  img{max-width:100%;display:block}
+  .wrap{width:min(1120px,calc(100% - 40px));margin:0 auto}
+
+  /* ---------- depth rail: a well-log depth axis down the page ---------- */
+  .rail{
+    position:fixed; left:0; top:0; bottom:0; width:56px; z-index:5;
+    border-right:1px solid var(--rule-soft);
+    display:flex; flex-direction:column;
+    pointer-events:none;
+  }
+  .rail i{flex:1; display:block; opacity:.62}
+  .rail i:nth-child(1){background:linear-gradient(180deg,var(--facies),rgba(232,163,61,.25))}
+  .rail i:nth-child(2){background:linear-gradient(180deg,rgba(232,163,61,.25),var(--prop-1))}
+  .rail i:nth-child(3){background:linear-gradient(180deg,var(--prop-1),var(--prop-2))}
+  .rail i:nth-child(4){background:linear-gradient(180deg,var(--prop-2),var(--prop-3))}
+  .rail i:nth-child(5){background:linear-gradient(180deg,var(--prop-3),rgba(46,94,158,.15))}
+
+  /* ---------- nav ---------- */
+  header{position:sticky;top:0;z-index:40;background:rgba(243,244,247,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--rule-soft)}
+  .nav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:15px 0}
+  .brand{display:flex;align-items:center;gap:11px;font-family:var(--display);font-weight:700;font-size:18.5px;letter-spacing:-.015em}
+  .brand svg{display:block;border-radius:8px;flex:none}
+  nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-family:var(--display);font-size:14.5px;font-weight:500}
+  nav a{text-decoration:none;color:var(--text-dim);padding-bottom:3px;border-bottom:1.5px solid transparent;transition:color .15s,border-color .15s}
+  nav a:hover,nav a:focus-visible{color:var(--text);border-bottom-color:var(--facies)}
+
+  /* ---------- hero ---------- */
+  .hero{padding:64px 0 10px}
+  .hero-top{display:grid;grid-template-columns:1.08fr .92fr;gap:48px;align-items:end}
+  h1{
+    font-family:var(--display);font-weight:800;
+    font-size:clamp(38px,4.8vw,62px);line-height:1.03;letter-spacing:-.032em;
+    margin:0;
+  }
+  .lede{font-size:19.5px;line-height:1.62;color:var(--text-dim);margin:0;font-weight:400}
+  .lede b{color:var(--text);font-weight:500}
+
+  /* the signature: facies in → property out, with the real model output */
+  .translate{
+    margin:48px 0 0;
+    display:grid;grid-template-columns:1fr auto 1fr 1fr;
+    gap:0;align-items:center;
+    border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);
+  }
+  .tcell{padding:28px 22px;min-width:0}
+  .tcell + .tcell{border-left:1px solid var(--rule-soft)}
+  .tlabel{
+    font-family:var(--display);font-size:13px;font-weight:600;letter-spacing:.02em;
+    color:var(--text-dim);margin-bottom:14px;
+  }
+  .tlabel span{color:var(--facies-ink)}
+  .tlabel.p span{color:var(--prop-1)}
+  .tcell img{margin:0 auto;max-height:200px;width:auto}
+  .tarrow{
+    padding:0 18px;color:var(--text-dim);font-family:var(--display);
+    font-size:26px;font-weight:500;line-height:1;
+  }
+
+  .cta{display:flex;gap:14px;flex-wrap:wrap;margin:36px 0 0}
+  .btn{
+    display:inline-flex;align-items:center;padding:14px 24px;border-radius:4px;
+    font-family:var(--display);font-weight:600;font-size:16px;text-decoration:none;
+    transition:transform .14s,background .14s;
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn-a{background:var(--facies);color:#1a1205}
+  .btn-a:hover{background:#f0b254}
+  .btn-b{border:1.5px solid var(--rule);color:var(--text);background:var(--bg-2)}
+  .btn-b:hover{background:var(--bg-3)}
+
+  .proofbar{
+    display:flex;flex-wrap:wrap;gap:12px 38px;margin:44px 0 0;padding-top:24px;
+    border-top:1px solid var(--rule-soft);
+    font-family:var(--display);font-size:14.5px;font-weight:500;color:var(--text-dim);
+  }
+  .proofbar span{display:block;position:relative;padding-left:14px;min-width:0}
+  .proofbar span::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;border-radius:50%;background:var(--facies)}
+  .proofbar i{font-style:italic}
+
+  /* comparison */
+  .cmp th:first-child,.cmp td:first-child{width:34%;color:var(--text-dim);font-weight:500}
+  .cmp thead th:last-child{color:var(--facies-ink)}
+  .cmp td.win{color:var(--text);font-weight:600}
+
+  /* engagement steps */
+  .steps{list-style:none;counter-reset:s;margin:40px 0 0;padding:0;display:grid;grid-template-columns:repeat(2,1fr);gap:34px 44px}
+  .steps li{display:grid;grid-template-columns:76px 1fr;gap:20px;align-items:start}
+  .sn{
+    font-family:var(--display);font-size:13.5px;font-weight:700;color:var(--facies-ink);
+    padding-top:4px;border-top:2px solid var(--facies);
+  }
+  .steps h3{font-family:var(--display);font-size:18.5px;font-weight:600;margin:0 0 7px;letter-spacing:-.012em}
+  .steps p{margin:0;color:var(--text-dim);font-size:16.5px;line-height:1.55}
+
+
+  /* drag-to-compare */
+  .cmp-wrap{margin:54px 0 0;padding-top:34px;border-top:1px solid var(--rule-soft)}
+  .cmp-h{font-family:var(--display);font-size:21px;font-weight:700;letter-spacing:-.018em;margin:0 0 8px}
+  .cmp-sub{color:var(--text-dim);font-size:16.5px;max-width:64ch;margin:0 0 26px}
+  .cmp-tabs{display:flex;gap:8px;margin:0 0 20px}
+  .cmp-tabs button{
+    font-family:var(--display);font-size:14.5px;font-weight:600;cursor:pointer;
+    background:var(--bg-2);color:var(--text-dim);border:1px solid var(--rule);
+    border-radius:3px;padding:9px 16px;transition:color .15s,border-color .15s,background .15s;
+  }
+  .cmp-tabs button:hover{color:var(--text)}
+  .cmp-tabs button[aria-selected="true"]{color:var(--facies-ink);border-color:var(--facies);background:rgba(232,163,61,.16)}
+  .compare[hidden]{display:none}
+  .compare{
+    position:relative;width:min(540px,100%);margin:0;user-select:none;
+    border:1px solid var(--rule);border-radius:4px;overflow:hidden;background:var(--bg-2);
+    touch-action:pan-y;
+  }
+  .compare img{display:block;width:100%;height:auto}
+  .cmp-top{position:absolute;inset:0;clip-path:inset(0 calc(100% - var(--pos)) 0 0)}
+  .cmp-line{
+    position:absolute;top:0;bottom:0;left:var(--pos);width:2px;background:var(--facies);
+    transform:translateX(-1px);pointer-events:none;
+  }
+  .cmp-grip{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:40px;height:40px;border-radius:50%;background:var(--facies);
+    box-shadow:0 2px 12px rgba(14,22,40,.3);
+  }
+  .cmp-grip::before,.cmp-grip::after{
+    content:"";position:absolute;top:50%;width:0;height:0;
+    border-top:5px solid transparent;border-bottom:5px solid transparent;margin-top:-5px;
+  }
+  .cmp-grip::before{left:10px;border-right:7px solid #1a1205}
+  .cmp-grip::after{right:10px;border-left:7px solid #1a1205}
+  .cmp-tag{
+    position:absolute;bottom:12px;font-family:var(--display);font-size:12.5px;font-weight:600;
+    padding:5px 10px;border-radius:3px;background:rgba(14,22,40,.86);color:#FFFFFF;pointer-events:none;
+  }
+  .cmp-tag.l{left:12px}
+  .cmp-tag.r{right:12px}
+  .cmp-range{
+    position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize;
+    -webkit-appearance:none;appearance:none;background:transparent;
+  }
+  .cmp-range::-webkit-slider-thumb{-webkit-appearance:none;width:46px;height:100%;cursor:ew-resize}
+  .cmp-range::-moz-range-thumb{width:46px;height:100%;border:0;background:transparent;cursor:ew-resize}
+  .cmp-range:focus-visible{outline:none}
+  .cmp-range:focus-visible ~ .cmp-line{box-shadow:0 0 0 2px rgba(232,163,61,.5)}
+
+  /* evidence slider: facies in, property out */
+  .ev-ctl{display:flex;flex-wrap:wrap;gap:4px 28px;margin:0 0 6px}
+  .cmp-tabs button[aria-pressed="true"]{color:var(--facies-ink);border-color:var(--facies);background:rgba(232,163,61,.16)}
+  .ev-grid{display:grid;grid-template-columns:minmax(0,560px) minmax(0,1fr);gap:40px;align-items:center}
+  .compare.sq{width:100%;background:#000}
+  .cmp-tag{top:12px;bottom:auto}
+  .ev-side{display:flex;flex-direction:column;gap:22px}
+  .lgd{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;font-family:var(--display);font-size:14.5px;color:var(--text-dim)}
+  .lgd-h{width:100%;font-size:12.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+  .lgd span i{display:inline-block;width:14px;height:14px;border-radius:2px;margin-right:7px;vertical-align:-2px}
+  .lgd .ramp{display:flex;align-items:center;gap:10px}
+  .lgd .ramp b{font-weight:500;font-variant-numeric:tabular-nums}
+  .lgd .ramp{width:100%;max-width:340px}
+  .lgd .ramp i{flex:1;min-width:60px;height:12px;margin:0;border-radius:2px}
+  .ev-stat{border-top:2px solid var(--ink);padding-top:12px}
+  .ev-stat b{display:block;font-family:var(--display);font-size:44px;font-weight:700;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+  .ev-stat span{color:var(--text-dim);font-size:16.5px}
+  .ev-note{color:var(--text-dim);font-size:15.5px;margin:0}
+
+  /* demo video */
+  .vid{margin:36px 0 0;border-radius:6px;overflow:hidden;border:1px solid var(--rule);background:var(--ink);aspect-ratio:16/9}
+  .vid video{display:block;width:100%;height:100%;object-fit:cover}
+  .vid-foot{display:flex;flex-wrap:wrap;gap:14px 28px;justify-content:space-between;align-items:center;margin:18px 0 0;font-family:var(--display);font-size:14.5px;color:var(--text-dim)}
+
+  /* vision */
+  .vm{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin:36px 0 0}
+  .vm-item{background:var(--ink-2);color:#EEF1F6;border-radius:6px;padding:30px 32px;display:flex;flex-direction:column;gap:12px}
+  .vm-k{font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--facies)}
+  .vm-t{font-family:var(--display);font-size:clamp(20px,2vw,25px);font-weight:600;line-height:1.3;letter-spacing:-.012em;margin:0;text-wrap:balance}
+  .vals{list-style:none;margin:34px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+  .vals li{border-top:2px solid var(--facies);padding-top:14px;display:flex;flex-direction:column;gap:6px}
+  .vals b{font-family:var(--display);font-size:18.5px;font-weight:600;letter-spacing:-.01em}
+  .vals span{color:var(--text-dim);font-size:16.5px;line-height:1.5}
+
+  /* motion */
+  .sprog{position:absolute;left:0;bottom:-1px;height:2px;width:0;background:var(--facies)}
+  nav a.on{color:var(--text);border-bottom-color:var(--facies)}
+  .js .rv{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.3,1)}
+  .js .rv.in{opacity:1;transform:none}
+
+  /* quick contact */
+  .qc{position:fixed;right:22px;bottom:22px;z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+  .qc-menu{display:flex;flex-direction:column;align-items:flex-end;gap:9px}
+  .qc-menu[hidden]{display:none}
+  .qc-menu a{
+    display:flex;align-items:center;gap:10px;text-decoration:none;
+    background:var(--bg-2);border:1px solid var(--rule);border-radius:999px;
+    padding:10px 17px 10px 13px;color:var(--text);
+    font-family:var(--display);font-size:14.5px;font-weight:600;white-space:nowrap;
+    box-shadow:0 6px 20px rgba(14,22,40,.14);
+    opacity:0;transform:translateY(8px);
+    animation:qcIn .22s cubic-bezier(.2,.8,.3,1) forwards;
+  }
+  .qc-menu a:nth-child(1){animation-delay:0ms}
+  .qc-menu a:nth-child(2){animation-delay:45ms}
+  .qc-menu a:nth-child(3){animation-delay:90ms}
+  @keyframes qcIn{to{opacity:1;transform:translateY(0)}}
+  .qc-menu a:hover,.qc-menu a:focus-visible{border-color:var(--facies);color:var(--facies-ink)}
+  .qc-menu svg{width:17px;height:17px;flex:none;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+  .qc-menu svg.solid{fill:currentColor;stroke:none}
+  .qc-btn{
+    width:58px;height:58px;border-radius:50%;border:0;cursor:pointer;
+    background:var(--facies);color:#1a1205;display:grid;place-items:center;
+    box-shadow:0 8px 24px rgba(14,22,40,.2);transition:transform .18s, background .18s;
+  }
+  .qc-btn:hover{background:#f0b254;transform:translateY(-2px)}
+  .qc-btn svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;transition:transform .2s}
+  .qc-btn[aria-expanded="true"] svg{transform:rotate(135deg)}
+  .qc-label{
+    position:absolute;right:68px;bottom:16px;white-space:nowrap;
+    font-family:var(--display);font-size:13.5px;font-weight:600;color:var(--text-dim);
+    background:var(--bg-2);border:1px solid var(--rule);border-radius:999px;padding:7px 14px;
+    opacity:0;transform:translateX(6px);transition:opacity .18s,transform .18s;pointer-events:none;
+  }
+  .qc-btn:hover + .qc-label,.qc-btn:focus-visible + .qc-label{opacity:1;transform:translateX(0)}
+  .qc-btn[aria-expanded="true"] + .qc-label{opacity:0}
+
+  /* ---------- sections ---------- */
+  section{padding:78px 0;border-top:1px solid var(--rule-soft)}
+  section:first-of-type{border-top:0}
+  h2{
+    font-family:var(--display);font-weight:700;
+    font-size:clamp(27px,3.3vw,40px);letter-spacing:-.025em;line-height:1.08;
+    margin:0 0 18px;max-width:20ch;
+  }
+  .intro{color:var(--text-dim);max-width:62ch;margin:0 0 8px;font-weight:300;font-size:19px}
+  p{margin:0 0 15px}
+
+  .band{background:var(--bg-2)}
+
+  /* result figure */
+  figure{margin:46px 0 0}
+  .trio{display:grid;grid-template-columns:repeat(3,1fr);gap:28px}
+  .trio img{width:100%;height:auto;max-height:300px;object-fit:contain}
+  figcaption{grid-column:1/-1;margin-top:10px;padding-top:20px;border-top:1px solid var(--rule-soft);color:var(--text-dim);font-size:16.5px;max-width:74ch}
+
+  /* table */
+  table{width:100%;border-collapse:collapse;margin:36px 0 0;font-family:var(--display);font-size:16px}
+  th,td{text-align:left;padding:14px 14px;border-bottom:1px solid var(--rule-soft)}
+  thead th{font-size:13.5px;font-weight:600;color:var(--text-dim);border-bottom-color:var(--rule)}
+  tbody td{font-weight:500}
+  td.n{font-variant-numeric:tabular-nums;color:var(--text-dim)}
+  td.n.hi{color:var(--prop-1);font-weight:700}
+  .note{margin-top:20px;color:var(--text-dim);font-size:16.5px;max-width:72ch}
+
+  /* status */
+  .status{list-style:none;margin:36px 0 0;padding:0}
+  .status li{display:grid;grid-template-columns:132px 1fr;gap:26px;padding:22px 0;border-top:1px solid var(--rule-soft)}
+  .status li:first-child{border-top:0;padding-top:0}
+  .tag{
+    font-family:var(--display);font-size:12.5px;font-weight:600;letter-spacing:.02em;
+    padding:5px 11px;border-radius:3px;justify-self:start;height:fit-content;
+  }
+  .tag.now{background:rgba(31,122,114,.14);color:var(--prop-1)}
+  .tag.dev{background:rgba(232,163,61,.2);color:var(--facies-ink)}
+  .status h3{font-family:var(--display);font-size:19px;font-weight:600;margin:0 0 6px;letter-spacing:-.01em}
+  .status p{margin:0;color:var(--text-dim);font-size:17px}
+
+  /* team */
+  .team{display:grid;grid-template-columns:repeat(2,1fr);gap:40px 48px;margin:44px 0 0}
+  .member{display:grid;grid-template-columns:104px 1fr;gap:22px;align-items:start}
+  .member img{width:104px;height:104px;border-radius:50%}
+  .member h3{font-family:var(--display);font-size:19.5px;font-weight:700;margin:0;letter-spacing:-.015em}
+  .role{font-family:var(--display);font-size:14px;font-weight:600;color:var(--facies-ink);margin:3px 0 10px}
+  .member p{margin:0;font-size:16.5px;color:var(--text-dim);line-height:1.55}
+  .collab{margin:52px 0 0;padding-top:26px;border-top:1px solid var(--rule-soft);color:var(--text-dim);font-size:17px;max-width:76ch}
+
+  /* milestones */
+  .time{list-style:none;margin:40px 0 0;padding:0;position:relative}
+  .time::before{content:"";position:absolute;left:92px;top:8px;bottom:8px;width:1px;background:var(--rule-soft)}
+  .time li{display:grid;grid-template-columns:92px 1fr;gap:34px;padding:0 0 26px;position:relative}
+  .time li:last-child{padding-bottom:0}
+  .when{font-family:var(--display);font-size:14.5px;font-weight:600;color:var(--text-dim);padding-top:1px}
+  .what{position:relative;font-size:17.5px}
+  .what::before{
+    content:"";position:absolute;left:-39px;top:9px;width:9px;height:9px;border-radius:50%;
+    background:var(--bg);border:2px solid var(--shale);
+  }
+  .time li.key .what::before{background:var(--facies);border-color:var(--facies)}
+  .time li.key .what{color:var(--text);font-weight:500}
+  .time li.key .what b{font-weight:500}
+
+  /* research */
+  .refs{list-style:none;margin:34px 0 0;padding:0}
+  .refs li{padding:20px 0;border-top:1px solid var(--rule-soft)}
+  .refs li:first-child{border-top:0;padding-top:0}
+  .venue{font-family:var(--display);font-size:13px;font-weight:600;color:var(--text-dim);margin-bottom:5px}
+  .refs a{color:var(--prop-2);text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:1px}
+  .refs a:hover{color:var(--prop-3)}
+
+  .meta{display:flex;flex-wrap:wrap;gap:10px 34px;margin:34px 0 0;font-family:var(--display);font-size:15.5px}
+  .meta a{color:var(--prop-2);text-decoration:underline;text-underline-offset:3px}
+
+  /* contact */
+  .contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:52px;margin:40px 0 0;align-items:start}
+  .contact-mail{font-family:var(--display);font-size:clamp(21px,2.5vw,28px);font-weight:600;letter-spacing:-.02em;margin:0;display:inline-block;color:var(--facies-ink);text-decoration:none;border-bottom:2px solid transparent}
+  .contact-mail:hover{border-bottom-color:var(--facies)}
+
+  .where{display:grid;grid-template-columns:22px 1fr;gap:14px;margin:30px 0 0;color:var(--text-dim);font-size:16.5px;line-height:1.5}
+  .where svg{width:22px;height:22px;fill:none;stroke:var(--facies-ink);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;margin-top:2px}
+  .where-l{font-family:var(--display);font-size:15px;font-weight:600;color:var(--text);margin-bottom:3px}
+
+  .map{width:100%;height:260px;margin:26px 0 0;border:1px solid var(--rule);border-radius:4px;
+    filter:grayscale(.2) contrast(1.02)}
+
+  .social{display:flex;gap:12px;margin:26px 0 0}
+  .social a{
+    width:44px;height:44px;display:grid;place-items:center;border:1px solid var(--rule);border-radius:4px;background:var(--bg-2);
+    transition:border-color .16s, background .16s, transform .16s;
+  }
+  .social svg{width:20px;height:20px;fill:none;stroke:var(--text-dim);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;transition:stroke .16s,fill .16s}
+  .social svg.solid{fill:var(--text-dim);stroke:none}
+  .social a:hover svg.solid,.social a:focus-visible svg.solid{fill:var(--facies)}
+  .social a:hover,.social a:focus-visible{border-color:var(--facies);background:rgba(232,163,61,.14);transform:translateY(-2px)}
+  .social a:hover svg,.social a:focus-visible svg{stroke:var(--facies)}
+
+  .cform{display:grid;gap:18px}
+  .cform label{font-family:var(--display);font-size:14.5px;font-weight:600;color:var(--text-dim);display:block}
+  .cform label input,.cform label textarea{margin-top:8px}
+  .cform label span{color:var(--facies-ink)}
+  .cform input,.cform textarea{
+    font-family:var(--body);font-size:16.5px;color:var(--text);
+    background:var(--bg-2);border:1px solid var(--rule);border-radius:4px;
+    padding:12px 14px;width:100%;transition:border-color .16s, background .16s;
+  }
+  .cform textarea{resize:vertical;line-height:1.5}
+  .cform input::placeholder,.cform textarea::placeholder{color:#8b97a8}
+  .cform input:focus,.cform textarea:focus{outline:none;border-color:var(--facies);background:#FFFDF8}
+  .cform button{
+    font-family:var(--display);font-weight:600;font-size:16px;
+    background:var(--facies);color:#1a1205;border:0;border-radius:4px;padding:14px 22px;
+    cursor:pointer;transition:background .16s, transform .14s;
+  }
+  .cform button:hover{background:#f0b254;transform:translateY(-1px)}
+  .fnote{margin:0;font-size:14.5px;color:var(--text-dim)}
+
+  footer{padding:40px 0 64px;border-top:1px solid var(--rule-soft);color:var(--text-dim);font-size:15.5px;background:var(--bg-2)}
+
+  :focus-visible{outline:2.5px solid var(--facies);outline-offset:3px;border-radius:2px}
+
+  @media (max-width:900px){
+    .rail{display:none}
+    .hero-top{grid-template-columns:1fr;gap:22px;align-items:start}
+    .translate{grid-template-columns:1fr 1fr}
+    .tcell + .tcell{border-left:0}
+    .tcell:nth-child(2){display:none}
+    .tcell{border-top:1px solid var(--rule-soft)}
+    .team{grid-template-columns:1fr}
+    .steps{grid-template-columns:1fr;gap:26px}
+    .contact-grid{grid-template-columns:1fr;gap:40px}
+    .ev-grid{grid-template-columns:1fr;gap:26px}
+    .vm{grid-template-columns:1fr}
+    .vals{grid-template-columns:1fr;gap:20px}
+    .qc{right:14px;bottom:14px}
+    .qc-btn{width:52px;height:52px}
+    .qc-label{display:none}
+    nav ul{display:none}
+  }
+  @media (max-width:620px){
+    body{font-size:17px}
+    .hero{padding-top:44px}
+    section{padding:54px 0}
+    .translate{grid-template-columns:1fr}
+    .status li{grid-template-columns:1fr;gap:10px}
+    .time::before{left:0}
+    .time li{grid-template-columns:1fr;gap:4px}
+    .what::before{display:none}
+    .member{grid-template-columns:76px 1fr;gap:16px}
+    .member img{width:76px;height:76px}
+    .trio{grid-template-columns:1fr;gap:22px}
+    th,td{padding:11px 7px;font-size:14.5px}
+    .cmp th:first-child,.cmp td:first-child{width:38%}
+    .cmp th,.cmp td{padding:11px 8px;font-size:14.5px}
+  }
+  @media (prefers-reduced-motion:reduce){
+    *{transition:none!important;animation:none!important}
+    .js .rv{opacity:1;transform:none}
+    html{scroll-behavior:auto}
+  }
+</style>
+</head>
+<body>
+
+<div class="rail" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+
+<header>
+  <div class="sprog" id="sprog" aria-hidden="true"></div>
+  <div class="wrap nav">
+    <div class="brand">
+      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
+        <rect width="32" height="32" rx="8" fill="#102140"/>
+        <rect x="6" y="7" width="7" height="5" fill="#E8A33D"/>
+        <rect x="6" y="13" width="7" height="5" fill="#E8A33D" opacity=".55"/>
+        <rect x="6" y="19" width="7" height="6" fill="#E8A33D" opacity=".8"/>
+        <rect x="17" y="7" width="9" height="5" fill="#4FC4B8"/>
+        <rect x="17" y="13" width="9" height="5" fill="#3C8FC0"/>
+        <rect x="17" y="19" width="9" height="6" fill="#2E5E9E"/>
+      </svg>
+      GeoPix AI
+    </div>
+    <nav>
+      <ul>
+        <li><a href="#method">Method</a></li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#demo">Demo</a></li>
+        <li><a href="#engagement">How it works</a></li>
+        <li><a href="#vision">Vision</a></li>
+        <li><a href="#team">Team</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <div class="wrap hero">
+    <div class="hero-top">
+      <h1>Reservoir property models in hours, not days.</h1>
+      <p class="lede">
+        GeoPix learns how geological facies relate to petrophysical properties, then generates porosity,
+        permeability and water saturation maps directly from a facies model. In validation with a national
+        oil company, <b>static modeling went from two to five days down to under two hours.</b>
+      </p>
+    </div>
+
+    <div class="translate">
+      <div class="tcell">
+        <div class="tlabel"><span>Facies model</span> — what you already have</div>
+        <img src="assets/hero-facies.png" alt="Facies model used as input, showing sand and shale distribution" width="499" height="508" loading="eager">
+      </div>
+      <div class="tcell tarrow" aria-hidden="true">→</div>
+      <div class="tcell">
+        <div class="tlabel p"><span>Permeability</span> — generated</div>
+        <img src="assets/perm-pred.png" alt="Permeability map generated by GeoPix from the facies input" width="529" height="517" loading="lazy">
+      </div>
+      <div class="tcell">
+        <div class="tlabel p"><span>Ground truth</span> — for comparison</div>
+        <img src="assets/perm-truth.png" alt="Measured permeability map used as ground truth" width="533" height="517" loading="lazy">
+      </div>
+    </div>
+
+    <div class="cta">
+      <a class="btn btn-a" href="#contact">Request a benchmark on your data</a>
+      <a class="btn btn-b" href="#results">See the numbers</a>
+    </div>
+
+    <div class="proofbar">
+      <span>Peer-reviewed in <i>Geoenergy Science and Engineering</i>, <i>Scientific Reports</i> and <i>Applied Computing and Geosciences</i></span>
+      <span>Patent filed</span>
+      <span>Deep-Tech Ventures Program, Dhahran Techno Valley</span>
+    </div>
+  </div>
+
+  <section id="demo" class="band">
+    <div class="wrap">
+      <h2>A geomodeler's week, in seventy seconds</h2>
+      <p class="intro">
+        Unit C has no core and the review is on Thursday. Watch the same task done the conventional way
+        and with GeoPix, then the published result that backs it.
+      </p>
+      <div class="vid">
+        <video id="demoVid" src="assets/geopix-demo.mp4" poster="assets/geopix-demo-poster.jpg"
+          muted playsinline controls preload="none" width="1920" height="1080"
+          aria-label="GeoPix AI demo video, 70 seconds, no sound"></video>
+      </div>
+      <div class="vid-foot">
+        <span>70 s · no sound · the workflow scenes are a schematic; the evidence scene shows published results</span>
+        <a class="btn btn-b" href="story.html">Step through it yourself →</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="method">
+    <div class="wrap">
+      <h2>Property prediction treated as image translation</h2>
+      <p class="intro">
+        Building a static model is slow and manual, and preserving spatial continuity across a heterogeneous
+        reservoir is the hardest part of it. GeoPix learns the mapping between properties from models you
+        have already built, then applies it.
+      </p>
+      <p class="intro">
+        The generator is a U-Net: an encoder-decoder with skip connections, so spatial detail survives
+        rather than being averaged away at the bottleneck. The discriminator is a PatchGAN, judging realism
+        patch by patch instead of over the whole image, which forces plausible local texture as well as
+        correct global structure. The same framework fills masked regions of a property grid from the
+        surrounding geology.
+      </p>
+
+      <figure class="trio">
+        <div>
+          <div class="tlabel"><span>Facies</span> — input</div>
+          <img src="assets/poro-input.png" alt="Facies model used as input, sand and shale distribution" loading="lazy">
+        </div>
+        <div>
+          <div class="tlabel p"><span>Porosity</span> — generated</div>
+          <img src="assets/poro-pred.png" alt="Porosity map generated by GeoPix" loading="lazy">
+        </div>
+        <div>
+          <div class="tlabel p"><span>Porosity</span> — measured</div>
+          <img src="assets/poro-truth.png" alt="Measured porosity map" loading="lazy">
+        </div>
+        <figcaption>
+          A second property from the same input. High-porosity bodies appear in the right places; the method
+          over-predicts their extent, which is why we report the per-class metrics below rather than a single
+          accuracy figure.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="results" class="band">
+    <div class="wrap">
+      <h2>Published benchmarks, not projections</h2>
+      <p class="intro">
+        Measured on the Groningen dataset and reported in <i>Geoenergy Science and Engineering</i>.
+      </p>
+
+      <table>
+        <thead>
+          <tr><th scope="col">Translation task</th><th scope="col">PA</th><th scope="col">mPA</th><th scope="col">mIoU</th><th scope="col">FWIoU</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Facies → Porosity</td><td class="n">0.58</td><td class="n">0.58</td><td class="n">0.39</td><td class="n">0.41</td></tr>
+          <tr><td>Porosity → Facies</td><td class="n hi">0.94</td><td class="n">0.40</td><td class="n">0.34</td><td class="n hi">0.91</td></tr>
+          <tr><td>Facies → Permeability</td><td class="n">0.70</td><td class="n">0.47</td><td class="n">0.36</td><td class="n">0.56</td></tr>
+          <tr><td>Facies → Water saturation</td><td class="n hi">0.98</td><td class="n">0.33</td><td class="n">0.33</td><td class="n hi">0.97</td></tr>
+        </tbody>
+      </table>
+
+      <p class="note">
+        PA is pixel accuracy, mPA mean pixel accuracy, mIoU mean intersection over union, FWIoU
+        frequency-weighted IoU. The gap between PA and mPA reflects class imbalance: dominant facies are
+        predicted more reliably than rare ones, so results on thin or uncommon units need checking against
+        well control. Facies → Porosity is the most balanced task and the hardest.
+      </p>
+
+      <div class="cmp-wrap">
+        <h3 class="cmp-h">From one facies slice to the property</h3>
+        <p class="cmp-sub">The facies on the left is the only input. Drag the handle to see what GeoPix generated from it on the same slice, then switch to the reference to check the match.</p>
+
+        <div class="ev-ctl">
+          <div class="cmp-tabs" role="group" aria-label="Property">
+            <button type="button" aria-pressed="true" data-p="poro">Facies → Porosity</button>
+            <button type="button" aria-pressed="false" data-p="perm">Facies → Permeability</button>
+          </div>
+          <div class="cmp-tabs" role="group" aria-label="Compare GeoPix with">
+            <button type="button" aria-pressed="true" data-m="facies">vs facies input</button>
+            <button type="button" aria-pressed="false" data-m="truth">vs reference</button>
+          </div>
+        </div>
+
+        <div class="ev-grid">
+          <div class="compare sq" id="evCmp" style="--pos:100%">
+            <img class="cmp-base" id="evPred" src="assets/ev-poro-pred.png" alt="Porosity generated by GeoPix from the facies slice" width="720" height="720">
+            <div class="cmp-top"><img id="evTop" src="assets/ev-poro-facies.png" alt="Facies slice used as input, same slice" width="720" height="720"></div>
+            <div class="cmp-line" aria-hidden="true"><span class="cmp-grip"></span></div>
+            <span class="cmp-tag l" id="evTagL">Facies · input</span>
+            <span class="cmp-tag r" id="evTagR">GeoPix porosity</span>
+            <input class="cmp-range" id="evRange" type="range" min="0" max="100" value="100" step="0.1" aria-label="Drag to compare the input with the GeoPix output">
+          </div>
+          <div class="ev-side">
+            <div class="lgd"><span class="lgd-h">Facies</span>
+              <span><i style="background:#808080"></i>Shale</span><span><i style="background:#F8A808"></i>Shaly sand</span><span><i style="background:#F8F808"></i>Sand</span></div>
+            <div class="lgd"><span class="lgd-h" id="evLgH">Porosity</span>
+              <span class="ramp"><b id="evLo">0.04</b><i id="evRamp" style="background:linear-gradient(90deg,#0000A8,#0008F8,#00C8F8,#08F890,#C8F808,#F8D808,#F87808,#C80808)"></i><b id="evHi">0.14 v/v</b></span></div>
+            <div class="ev-stat"><b id="evPA">0.58</b><span id="evPAl">pixel accuracy, facies → porosity</span></div>
+            <p class="ev-note">One slice of the Groningen field model, from Al-Fakih et al. (2026), <i>Geoenergy Science and Engineering</i>.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="compare">
+    <div class="wrap">
+      <h2>Against the workflow you run now</h2>
+      <p class="intro">
+        For one property across a gridded reservoir model, measured during validation with a national oil company.
+      </p>
+
+      <table class="cmp">
+        <thead>
+          <tr><th scope="col"></th><th scope="col">Conventional workflow</th><th scope="col">With GeoPix</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Time per property</td><td>2–5 days</td><td class="win">Under 2 hours</td></tr>
+          <tr><td>Interpreter input</td><td>Continuous</td><td class="win">Set-up and review</td></tr>
+          <tr><td>Repeat for a second property</td><td>Repeat the cycle</td><td class="win">Re-run the model</td></tr>
+          <tr><td>Reproducible from the same inputs</td><td>Depends on the interpreter</td><td class="win">Deterministic</td></tr>
+          <tr><td>Handles a property that is missing entirely</td><td>Geostatistical infill</td><td class="win">Reconstructed from surrounding geology</td></tr>
+        </tbody>
+      </table>
+      <p class="note">
+        GeoPix does not replace the interpreter. It removes the repetitive part of the cycle so the time goes into
+        judging the result instead of producing it. Outputs still need checking against well control, particularly
+        on thin or uncommon units.
+      </p>
+    </div>
+  </section>
+
+  <section id="status">
+    <div class="wrap">
+      <h2>What we offer today</h2>
+      <p class="intro">Stated plainly, because a technical evaluator finds out either way.</p>
+
+      <ul class="status">
+        <li>
+          <span class="tag now">Available</span>
+          <div>
+            <h3>Benchmarking on your reservoir</h3>
+            <p>We run the method against your existing geomodeling workflow on your own gridded data, under NDA, and report where it holds and where it does not.</p>
+          </div>
+        </li>
+        <li>
+          <span class="tag now">Available</span>
+          <div>
+            <h3>Pix2Geomodel implementation</h3>
+            <p>Trained models for facies-to-property and property-to-facies translation, plus masked reconstruction, with the published benchmarks reproducible from open code.</p>
+          </div>
+        </li>
+        <li>
+          <span class="tag dev">In development</span>
+          <div>
+            <h3>Batch inference and workflow tooling</h3>
+            <p>Preprocessing, batch processing and integration for teams running this across many models.</p>
+          </div>
+        </li>
+        <li>
+          <span class="tag dev">In development</span>
+          <div>
+            <h3>Geothermal and CO₂ storage</h3>
+            <p>Extending the framework beyond hydrocarbon reservoirs.</p>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="engagement">
+    <div class="wrap">
+      <h2>How an engagement runs</h2>
+      <p class="intro">Four weeks from your model to a report you can act on. No licence to buy before you know whether it works.</p>
+
+      <ol class="steps">
+        <li>
+          <div class="sn">Week 1</div>
+          <div>
+            <h3>NDA and data handover</h3>
+            <p>You send a gridded model with at least two properties. Facies plus porosity is the usual starting point. Data stays in your environment if that is a requirement.</p>
+          </div>
+        </li>
+        <li>
+          <div class="sn">Week 2</div>
+          <div>
+            <h3>Training on your reservoir</h3>
+            <p>We fit the model to your field rather than applying a generic one, and hold out a region you choose as a blind test.</p>
+          </div>
+        </li>
+        <li>
+          <div class="sn">Week 3</div>
+          <div>
+            <h3>Blind comparison</h3>
+            <p>Generated properties against your held-out ground truth, scored with the same metrics we publish, zone by zone.</p>
+          </div>
+        </li>
+        <li>
+          <div class="sn">Week 4</div>
+          <div>
+            <h3>Report and the honest verdict</h3>
+            <p>Where it matched, where it did not, and whether it is worth putting into your workflow. If the answer is no, we say so.</p>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section id="vision">
+    <div class="wrap">
+      <h2>Why GeoPix exists</h2>
+      <div class="vm">
+        <div class="vm-item">
+          <span class="vm-k">Vision</span>
+          <p class="vm-t">Every subsurface model built from the data already in hand, for oil and gas, CO₂ storage, geothermal energy and groundwater, starting in Saudi Arabia.</p>
+        </div>
+        <div class="vm-item">
+          <span class="vm-k">Mission</span>
+          <p class="vm-t">Give geomodelers a property engine they can check: published methods, blind benchmarks on each customer's own reservoir, and the geologist in charge of every result.</p>
+        </div>
+      </div>
+      <ul class="vals">
+        <li><b>Checkable claims</b><span>Every number on this site traces to a paper or a benchmark you can repeat.</span></li>
+        <li><b>The geologist decides</b><span>GeoPix proposes property models. Experts review, challenge and sign off.</span></li>
+        <li><b>Your data stays yours</b><span>Benchmarks run under NDA. Data and outputs belong to the owner.</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="team" class="band">
+    <div class="wrap">
+      <h2>Who builds it</h2>
+
+      <div class="team">
+        <div class="member">
+          <img src="assets/team-alfakih.png" alt="" width="104" height="104" loading="lazy">
+          <div>
+            <h3>Abdulrahman Al-Fakih</h3>
+            <div class="role">Founder &amp; CEO</div>
+            <p>PhD geophysics, KFUPM. Created the Pix2Geomodel method and led its validation with a national oil company, cutting static modeling from days to under two hours. Project manager on subsurface AI research. Previously a reservoir, wireline and production engineer on producing fields in Yemen.</p>
+          </div>
+        </div>
+
+        <div class="member">
+          <img src="assets/team-nabil.png" alt="" width="104" height="104" loading="lazy">
+          <div>
+            <h3>Nabil Saraih</h3>
+            <div class="role">Co-Founder</div>
+            <p>Ten years in petroleum geoscience. Built integrated static and dynamic reservoir models at TOTAL Energies, and worked as a geoscientist and software engineer at Schlumberger. PhD geology, KFUPM. Works daily in Petrel, Techlog, Petromod and Eclipse.</p>
+          </div>
+        </div>
+
+        <div class="member">
+          <img src="assets/team-ardi.png" alt="" width="104" height="104" loading="lazy">
+          <div>
+            <h3>Ardiansyah Koeshidayatullah</h3>
+            <div class="role">Scientific &amp; Technical Lead</div>
+            <p>Associate Professor at KFUPM and former Stanford postdoctoral fellow. Leads the PREDICT group on AI in geosciences. Associate Editor, <i>JGR: Machine Learning and Computation</i>.</p>
+          </div>
+        </div>
+
+        <div class="member">
+          <img src="assets/team-kaka.png" alt="" width="104" height="104" loading="lazy">
+          <div>
+            <h3>SanLinn I. Kaka</h3>
+            <div class="role">Scientific Advisor</div>
+            <p>Associate Professor at KFUPM, PhD Carleton. Twenty years in reservoir characterization and monitoring, microseismic analysis, and AI applications in geophysics.</p>
+          </div>
+        </div>
+      </div>
+
+      <p class="collab">
+        Developed through research collaborations with KFUPM, the SDAIA–KFUPM Joint Research Center for AI,
+        Stanford University, and a national oil company.
+      </p>
+    </div>
+  </section>
+
+  <section id="milestones">
+    <div class="wrap">
+      <h2>Where we are</h2>
+
+      <ul class="time">
+        <li><span class="when">2023</span><span class="what">First machine-learning reservoir property prediction published, <i>IEEE Access</i></span></li>
+        <li><span class="when">2024</span><span class="what">Pix2Geomodel development begins with a national oil company</span></li>
+        <li><span class="when">2025</span><span class="what">Patent application filed</span></li>
+        <li><span class="when">Mar 2025</span><span class="what">Sequence-based GANs for well log generation published, <i>Scientific Reports</i></span></li>
+        <li><span class="when">Dec 2025</span><span class="what">Validation complete: static modeling cycle cut from days to under two hours</span></li>
+        <li><span class="when">2026</span><span class="what">Pix2Geomodel published, <i>Geoenergy Science and Engineering</i></span></li>
+        <li class="key"><span class="when">Oct 2026</span><span class="what"><b>Selected for the Deep-Tech Ventures Program at Dhahran Techno Valley, from more than 230 applications</b></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <section id="research" class="band">
+    <div class="wrap">
+      <h2>Everything here is checkable</h2>
+
+      <ul class="refs">
+        <li>
+          <div class="venue">Geoenergy Science and Engineering, 2026</div>
+          Pix2Geomodel: a next-generation reservoir geomodeling with property-to-property translation.
+          <a href="https://doi.org/10.1016/j.geoen.2025.214342">doi.org/10.1016/j.geoen.2025.214342</a>
+        </li>
+        <li>
+          <div class="venue">Scientific Reports, 2025</div>
+          Well log data generation and imputation using sequence based generative adversarial networks.
+          <a href="https://doi.org/10.1038/s41598-025-95709-0">doi.org/10.1038/s41598-025-95709-0</a>
+        </li>
+        <li>
+          <div class="venue">Applied Computing and Geosciences, 2026</div>
+          Enhanced anomaly detection in well log data through the application of ensemble GANs.
+          <a href="https://doi.org/10.1016/j.acags.2025.100316">doi.org/10.1016/j.acags.2025.100316</a>
+        </li>
+      </ul>
+
+      <div class="meta">
+        <span>Patent application filed, 2025</span>
+        <a href="https://github.com/ARhaman/GeoPix">Open implementation on GitHub</a>
+        <span>Dhahran, Saudi Arabia</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap">
+      <h2>Bring us a reservoir</h2>
+      <p class="intro">
+        If you are assessing whether generative models fit your geomodeling workflow, send us a model and we
+        will benchmark the method against it under NDA. We will tell you where it works and where it does not.
+      </p>
+
+      <div class="contact-grid">
+        <div>
+          <a class="contact-mail" href="mailto:contact@geopix-ai.com">contact@geopix-ai.com</a>
+
+          <div class="where">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.6"/></svg>
+            <div>
+              <div class="where-l">Dhahran Techno Valley</div>
+              KFUPM Innovation Cluster Building<br>
+              Dhahran 34464, Saudi Arabia
+            </div>
+          </div>
+
+          <iframe
+            class="map"
+            title="GeoPix AI location, KFUPM Innovation Cluster Building at Dhahran Techno Valley"
+            src="https://www.google.com/maps?q=KFUPM%20Innovation%20Cluster%20Building%20DTV%20Dhahran&output=embed"
+            loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+
+          <div class="social">
+            <a href="mailto:contact@geopix-ai.com" aria-label="Email GeoPix AI" title="Email">
+              <svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M3 7l9 6 9-6"/></svg>
+            </a>
+            <a href="https://www.linkedin.com/company/geopix-ai/" aria-label="GeoPix AI on LinkedIn" title="LinkedIn">
+              <svg viewBox="0 0 24 24"><rect x="2.5" y="2.5" width="19" height="19" rx="3"/><path d="M7 10.5v7M7 7.2v.1M11.5 17.5v-4a2.5 2.5 0 0 1 5 0v4"/></svg>
+            </a>
+            <a href="https://github.com/ARhaman/GeoPix" aria-label="GitHub" title="GitHub">
+              <svg class="solid" viewBox="0 0 24 24"><path d="M12 1.5A10.5 10.5 0 0 0 8.7 22c.52.1.71-.23.71-.5v-1.9c-2.9.63-3.52-1.4-3.52-1.4-.48-1.21-1.16-1.53-1.16-1.53-.95-.65.07-.64.07-.64 1.05.08 1.6 1.08 1.6 1.08.94 1.6 2.46 1.14 3.06.87.1-.68.37-1.14.66-1.4-2.31-.27-4.74-1.16-4.74-5.15 0-1.14.4-2.07 1.07-2.8-.11-.26-.47-1.32.1-2.76 0 0 .87-.28 2.86 1.07a9.9 9.9 0 0 1 5.2 0c1.99-1.35 2.86-1.07 2.86-1.07.57 1.44.21 2.5.1 2.76.67.73 1.07 1.66 1.07 2.8 0 4-2.43 4.88-4.75 5.14.38.33.71.97.71 1.95v2.9c0 .28.19.61.72.5A10.5 10.5 0 0 0 12 1.5z"/></svg>
+            </a>
+            <a href="https://scholar.google.com/citations?user=39TVhfcAAAAJ&amp;hl=en" aria-label="Google Scholar" title="Google Scholar">
+              <svg viewBox="0 0 24 24"><path d="M12 3.2 1.8 9 12 14.8 22.2 9z"/><path d="M5.6 11.2v4.4c0 1.9 2.9 3.4 6.4 3.4s6.4-1.5 6.4-3.4v-4.4"/></svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- TODO: the form needs a backend. GitHub Pages cannot process submissions.
+             Sign up with a form service (Formspree, Web3Forms or similar), then replace
+             the action URL below with the endpoint they give you. Until you do, the form
+             will not send anything. If you would rather not use a third party, delete
+             this whole <form> block and keep the email address above. -->
+        <form class="cform" action="https://formspree.io/f/REPLACE_WITH_YOUR_FORM_ID" method="POST">
+          <label>Name <span>*</span>
+            <input type="text" name="name" required autocomplete="name">
+          </label>
+          <label>Email <span>*</span>
+            <input type="email" name="email" required autocomplete="email">
+          </label>
+          <label>Company
+            <input type="text" name="company" autocomplete="organization">
+          </label>
+          <label>What you would like benchmarked <span>*</span>
+            <textarea name="message" rows="5" required
+              placeholder="Field or basin, which properties you have, and what you are trying to decide."></textarea>
+          </label>
+          <button type="submit">Send message</button>
+          <p class="fnote">We reply within two working days. Nothing you send is shared outside GeoPix AI.</p>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">GeoPix AI — generative models for reservoir geomodeling. Dhahran, Saudi Arabia.</div>
+</footer>
+
+
+<div class="qc">
+  <div class="qc-menu" id="qcMenu" hidden>
+    <a href="#contact" data-close>
+      <svg viewBox="0 0 24 24"><path d="M4 5h16M4 12h16M4 19h10"/></svg>
+      Request a benchmark
+    </a>
+    <a href="mailto:contact@geopix-ai.com">
+      <svg viewBox="0 0 24 24"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M3 7l9 6 9-6"/></svg>
+      contact@geopix-ai.com
+    </a>
+    <a href="https://www.linkedin.com/company/geopix-ai/">
+      <svg viewBox="0 0 24 24"><rect x="2.5" y="2.5" width="19" height="19" rx="3"/><path d="M7 10.5v7M7 7.2v.1M11.5 17.5v-4a2.5 2.5 0 0 1 5 0v4"/></svg>
+      LinkedIn
+    </a>
+  </div>
+  <button class="qc-btn" id="qcBtn" aria-expanded="false" aria-controls="qcMenu" aria-label="Quick contact">
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+  </button>
+  <span class="qc-label">Quick contact</span>
+</div>
+
+<script>
+(function () {
+  // drag-to-compare
+  document.querySelectorAll('.compare').forEach(function (box) {
+    var range = box.querySelector('.cmp-range');
+    if (!range) return;
+    var set = function () { box.style.setProperty('--pos', range.value + '%'); };
+    range.addEventListener('input', set);
+    set();
+  });
+
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // evidence slider: facies input or reference on the left, GeoPix output on the right
+  var EV = {
+    poro: {name: 'porosity', lo: '0.04', hi: '0.14 v/v', pa: '0.58',
+      ramp: 'linear-gradient(90deg,#0000A8,#0008F8,#00C8F8,#08F890,#C8F808,#F8D808,#F87808,#C80808)'},
+    perm: {name: 'permeability', lo: '1', hi: '1000 mD, log', pa: '0.70',
+      ramp: 'linear-gradient(90deg,#A000C8,#0008F8,#00C8F8,#08F890,#C8F808,#F8D808,#F87808,#C80808)'}
+  };
+  var ev = {p: 'poro', m: 'facies', touched: false};
+  var box = document.getElementById('evCmp'), range = document.getElementById('evRange');
+  var $ = function (id) { return document.getElementById(id); };
+  var setPos = function (v) { range.value = v; box.style.setProperty('--pos', v + '%'); };
+  var paint = function () {
+    var d = EV[ev.p];
+    $('evPred').src = 'assets/ev-' + ev.p + '-pred.png';
+    $('evPred').alt = d.name.charAt(0).toUpperCase() + d.name.slice(1) + ' generated by GeoPix from the facies slice';
+    $('evTop').src = 'assets/ev-' + ev.p + '-' + ev.m + '.png';
+    $('evTop').alt = ev.m === 'facies' ? 'Facies slice used as input, same slice' : 'Reference ' + d.name + ', same slice';
+    $('evTagL').textContent = ev.m === 'facies' ? 'Facies · input' : 'Reference ' + d.name;
+    $('evTagR').textContent = 'GeoPix ' + d.name;
+    $('evLgH').textContent = d.name.charAt(0).toUpperCase() + d.name.slice(1);
+    $('evLo').textContent = d.lo; $('evHi').textContent = d.hi; $('evRamp').style.background = d.ramp;
+    $('evPA').textContent = d.pa; $('evPAl').textContent = 'pixel accuracy, facies → ' + d.name;
+    document.querySelectorAll('[data-p]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.p === ev.p)); });
+    document.querySelectorAll('[data-m]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.dataset.m === ev.m)); });
+  };
+  var sweep = function () {
+    if (reduce || ev.touched) { setPos(50); return; }
+    var t0 = null;
+    var step = function (now) {
+      if (ev.touched) return;
+      if (t0 === null) t0 = now;
+      var u = (now - t0) / 1000, ease = function (x) { x = Math.max(0, Math.min(1, x)); return x * x * (3 - 2 * x); };
+      var v = u < .4 ? 100 : u < 2.4 ? 100 - ease((u - .4) / 2) * 100 : u < 2.9 ? 0 : 50 * ease((u - 2.9) / 1.1);
+      setPos(v);
+      if (u < 4) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  };
+  if (box) {
+    range.addEventListener('input', function () { ev.touched = true; setPos(range.value); });
+    document.querySelector('.ev-ctl').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      if (b.dataset.p) ev.p = b.dataset.p; if (b.dataset.m) ev.m = b.dataset.m;
+      paint(); ev.touched = false; setPos(100); sweep();
+    });
+    if ('IntersectionObserver' in window) {
+      var once = new IntersectionObserver(function (es) {
+        if (es[0].isIntersecting) { sweep(); once.disconnect(); }
+      }, {threshold: .5});
+      once.observe(box);
+    } else { setPos(50); }
+    if (reduce) setPos(50);
+  }
+
+  // demo video: plays muted while on screen
+  var vid = document.getElementById('demoVid');
+  if (vid && 'IntersectionObserver' in window && !reduce) {
+    var userPaused = false;
+    vid.addEventListener('pause', function () { if (vid.dataset.auto !== '1') userPaused = true; vid.dataset.auto = ''; });
+    new IntersectionObserver(function (es) {
+      var e = es[0];
+      if (e.isIntersecting && !userPaused) { vid.preload = 'auto'; var p = vid.play(); if (p && p.catch) p.catch(function () {}); }
+      else if (!e.isIntersecting && !vid.paused) { vid.dataset.auto = '1'; vid.pause(); }
+    }, {threshold: .55}).observe(vid);
+  }
+
+  // reveal on scroll
+  if ('IntersectionObserver' in window && !reduce) {
+    document.documentElement.classList.add('js');
+    var targets = document.querySelectorAll('main h2, .intro, .translate, .trio > div, table, .cmp-wrap, .vid, .steps li, .status li, .vm-item, .vals li, .member, .time li, .refs li, .contact-grid > *');
+    var ro = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } });
+    }, {rootMargin: '0px 0px -8% 0px'});
+    targets.forEach(function (el, i) { el.classList.add('rv'); el.style.transitionDelay = (i % 4) * 60 + 'ms'; ro.observe(el); });
+  }
+
+  // reading progress and active section in the nav
+  var bar = document.getElementById('sprog');
+  var links = Array.prototype.slice.call(document.querySelectorAll('nav a[href^="#"]'));
+  var secs = links.map(function (a) { return document.querySelector(a.getAttribute('href')); });
+  var onScroll = function () {
+    var h = document.documentElement, max = h.scrollHeight - h.clientHeight;
+    if (bar) bar.style.width = (max > 0 ? h.scrollTop / max * 100 : 0) + '%';
+    var cur = -1;
+    secs.forEach(function (s, i) { if (s && s.getBoundingClientRect().top < 140) cur = i; });
+    links.forEach(function (a, i) { a.classList.toggle('on', i === cur); });
+  };
+  window.addEventListener('scroll', onScroll, {passive: true}); onScroll();
+
+  // quick contact
+  var btn = document.getElementById('qcBtn');
+  var menu = document.getElementById('qcMenu');
+  if (!btn || !menu) return;
+  var open = function (state) {
+    btn.setAttribute('aria-expanded', String(state));
+    menu.hidden = !state;
+  };
+  btn.addEventListener('click', function (e) {
+    e.stopPropagation();
+    open(btn.getAttribute('aria-expanded') !== 'true');
+  });
+  menu.addEventListener('click', function (e) {
+    if (e.target.closest('a')) open(false);
+  });
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('.qc')) open(false);
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && btn.getAttribute('aria-expanded') === 'true') { open(false); btn.focus(); }
+  });
+})();
+</script>
+
+</body>
+</html>
