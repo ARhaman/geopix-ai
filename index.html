@@ -279,6 +279,36 @@
   .adv h3{font-family:var(--display);font-size:18px;font-weight:700;margin:0;letter-spacing:-.01em}
   .adv p{margin:6px 0 0;font-size:16px;color:var(--text-dim);line-height:1.5}
 
+  /* ---- hero: claim left, live proof right ---- */
+  .hero2{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr);gap:56px;align-items:center;padding:72px 0 40px}
+  .h2-copy{display:flex;flex-direction:column;gap:22px}
+  .kicker{font-family:var(--display);font-size:13.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--facies-ink)}
+  .hero2 h1{font-size:clamp(42px,5.4vw,70px)}
+  .hero2 .lede{font-size:21px;max-width:30ch}
+  .hero2 .cta{margin:6px 0 0}
+  .h2-proof{margin:0;padding:0;border:0;display:flex;flex-direction:column;gap:12px}
+  .h2-proof .compare{width:100%;border-radius:14px;box-shadow:0 24px 60px rgba(14,22,40,.18);border:0}
+  .h2-legend{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 20px}
+  .h2-cap{margin:0;font-family:var(--display);font-size:13.5px;color:var(--text-dim)}
+  .stats{list-style:none;margin:8px 0 0;padding:26px 0 56px;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px;border-top:1px solid var(--rule)}
+  .stats li{display:flex;flex-direction:column;gap:2px}
+  .stats b{font-family:var(--display);font-size:clamp(30px,3.4vw,42px);font-weight:800;letter-spacing:-.03em;line-height:1.05}
+  .stats span{font-family:var(--display);font-size:15px;color:var(--text-dim)}
+  .how{list-style:none;margin:30px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+  .how li{display:flex;flex-direction:column;gap:6px;padding:26px;border-radius:12px;background:var(--bg-2);border:1px solid var(--rule-soft)}
+  .how .n{font-family:var(--display);font-size:14px;font-weight:700;color:var(--facies-ink)}
+  .how b{font-family:var(--display);font-size:26px;font-weight:800;letter-spacing:-.02em}
+  .how li span:last-child{color:var(--text-dim);font-size:17px}
+  .gains{list-style:none;margin:30px 0 0;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+  .gains li{border-top:2px solid var(--facies);padding-top:12px;display:flex;flex-direction:column;gap:4px}
+  .gains b{font-family:var(--display);font-size:19px;font-weight:700}
+  .gains span{color:var(--text-dim);font-size:17px}
+  .weeks{list-style:none;margin:30px 0 30px;padding:0;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;counter-reset:w}
+  .weeks li{background:var(--bg);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:4px;position:relative}
+  .weeks span{font-family:var(--display);font-size:13px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--facies-ink)}
+  .weeks b{font-family:var(--display);font-size:19px;font-weight:700}
+  #team .member p{font-size:16.5px}
+
   /* quick contact */
   .qc{position:fixed;right:22px;bottom:22px;z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
   .qc-menu{display:flex;flex-direction:column;align-items:flex-end;gap:9px}
@@ -450,6 +480,9 @@
     .team{grid-template-columns:1fr}
     .steps{grid-template-columns:1fr;gap:26px}
     .contact-grid{grid-template-columns:1fr;gap:40px}
+    .hero2{grid-template-columns:1fr;gap:36px;padding-top:48px}
+    .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .how,.gains,.weeks{grid-template-columns:1fr}
     .hero-band .hero-top{grid-template-columns:1fr}
     .hero-mark{width:180px;height:180px;border-radius:28px;order:-1}
     .uses{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -498,11 +531,10 @@
     </a>
     <nav>
       <ul>
-        <li><a href="#method">Method</a></li>
-        <li><a href="#results">Results</a></li>
+        <li><a href="#how">How it works</a></li>
         <li><a href="#demo">Demo</a></li>
-        <li><a href="#engagement">How it works</a></li>
-        <li><a href="#vision">Vision</a></li>
+        <li><a href="#uses">Applications</a></li>
+        <li><a href="#results">Results</a></li>
         <li><a href="#team">Team</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
@@ -512,113 +544,102 @@
 
 <main>
 
-  <div class="hero-band">
-  <div class="wrap hero">
-    <div class="hero-top">
-      <div class="hero-copy">
-      <h1>Reservoir property models in hours, not days.</h1>
-      <p class="lede">
-        GeoPix learns how geological facies relate to petrophysical properties, then generates porosity,
-        permeability and water saturation maps directly from a facies model. In validation with a national
-        oil company, <b>static modeling went from two to five days down to under two hours.</b>
-      </p>
-      </div>
-      <img class="hero-mark" src="assets/logo-mark-hero.png" alt="GeoPix AI mark: an object-based channel and an SIS facies model, each translated into a property model" width="512" height="512">
-    </div>
-
-    <div class="translate">
-      <div class="tcell">
-        <div class="tlabel"><span>Facies model</span> — what you already have</div>
-        <img src="assets/hero-facies.png" alt="Facies model used as input, showing sand and shale distribution" width="499" height="508" loading="eager">
-      </div>
-      <div class="tcell tarrow" aria-hidden="true">→</div>
-      <div class="tcell">
-        <div class="tlabel p"><span>Permeability</span> — generated</div>
-        <img src="assets/perm-pred.png" alt="Permeability map generated by GeoPix from the facies input" width="529" height="517" loading="lazy">
-      </div>
-      <div class="tcell">
-        <div class="tlabel p"><span>Ground truth</span> — for comparison</div>
-        <img src="assets/perm-truth.png" alt="Measured permeability map used as ground truth" width="533" height="517" loading="lazy">
+  <div class="wrap hero2">
+    <div class="h2-copy">
+      <span class="kicker">Generative AI for subsurface modeling</span>
+      <h1>Property models in hours, not days.</h1>
+      <p class="lede">GeoPix turns your facies model into porosity, permeability and saturation, and back again, using the data you already have.</p>
+      <div class="cta">
+        <a class="btn btn-a" href="#contact">Book a benchmark</a>
+        <a class="btn btn-b" href="#demo">Watch the 70-second demo</a>
       </div>
     </div>
 
-    <div class="cta">
-      <a class="btn btn-a" href="#contact">Request a benchmark on your data</a>
-      <a class="btn btn-b" href="#results">See the numbers</a>
-    </div>
-
-    <div class="proofbar">
-      <span>Peer-reviewed in <i>Geoenergy Science and Engineering</i>, <i>Scientific Reports</i> and <i>Applied Computing and Geosciences</i></span>
-      <span>Patent filed</span>
-      <span>Deep-Tech Ventures Program, Dhahran Techno Valley</span>
+    <div class="h2-proof cmp-wrap">
+      <div class="ev-ctl">
+        <div class="cmp-tabs" role="group" aria-label="Property">
+          <button type="button" aria-pressed="true" data-p="poro">Porosity</button>
+          <button type="button" aria-pressed="false" data-p="perm">Permeability</button>
+        </div>
+        <div class="cmp-tabs" role="group" aria-label="Compare GeoPix with">
+          <button type="button" aria-pressed="true" data-m="facies">vs input</button>
+          <button type="button" aria-pressed="false" data-m="truth">vs reference</button>
+        </div>
+      </div>
+      <div class="compare sq" id="evCmp" style="--pos:100%">
+        <img class="cmp-base" id="evPred" src="assets/ev-poro-pred.png" alt="Porosity generated by GeoPix from the facies slice" width="720" height="720">
+        <div class="cmp-top"><img id="evTop" src="assets/ev-poro-facies.png" alt="Facies slice used as input, same slice" width="720" height="720"></div>
+        <div class="cmp-line" aria-hidden="true"><span class="cmp-grip"></span></div>
+        <span class="cmp-tag l" id="evTagL">Facies · input</span>
+        <span class="cmp-tag r" id="evTagR">GeoPix porosity</span>
+        <input class="cmp-range" id="evRange" type="range" min="0" max="100" value="100" step="0.1" aria-label="Drag to compare the input with the GeoPix output">
+      </div>
+      <div class="h2-legend">
+        <div class="lgd"><span><i style="background:#808080"></i>Shale</span><span><i style="background:#F8A808"></i>Shaly sand</span><span><i style="background:#F8F808"></i>Sand</span></div>
+        <div class="lgd"><span class="lgd-h" id="evLgH" hidden>Porosity</span><span class="ramp"><b id="evLo">0.04</b><i id="evRamp" style="background:linear-gradient(90deg,#0000A8,#0008F8,#00C8F8,#08F890,#C8F808,#F8D808,#F87808,#C80808)"></i><b id="evHi">0.14 v/v</b></span></div>
+      </div>
+      <p class="h2-cap">Drag to compare. Published result, Groningen field · <span id="evPA">0.58</span> <span id="evPAl">pixel accuracy</span></p>
     </div>
   </div>
+
+  <div class="wrap">
+    <ul class="stats">
+      <li><b>&lt;&nbsp;2&nbsp;h</b><span>per property model</span></li>
+      <li><b>3</b><span>peer-reviewed papers</span></li>
+      <li><b>US</b><span>patent application filed</span></li>
+      <li><b>DTV</b><span>Deep-Tech Ventures cohort</span></li>
+    </ul>
   </div>
 
   <section id="demo" class="band">
     <div class="wrap">
-      <h2>A geomodeler's week, in seventy seconds</h2>
-      <p class="intro">
-        Unit C has no core and the review is on Thursday. Watch the same task done the conventional way
-        and with GeoPix, then the published result that backs it.
-      </p>
+      <h2>See it in 70 seconds</h2>
       <div class="vid">
         <video id="demoVid" src="assets/geopix-demo.mp4" poster="assets/geopix-demo-poster.jpg"
           muted playsinline controls preload="none" width="1920" height="1080"
           aria-label="GeoPix AI demo video, 70 seconds, no sound"></video>
       </div>
       <div class="vid-foot">
-        <span>70 s · no sound · the workflow scenes are a schematic; the evidence scene shows published results</span>
+        <span>Workflow scenes are a schematic. The evidence is published.</span>
         <a class="btn btn-b" href="story.html">Step through it yourself →</a>
       </div>
     </div>
   </section>
 
-  <section id="method">
+  <section id="how">
     <div class="wrap">
-      <h2>Property prediction treated as image translation</h2>
-      <p class="intro">
-        Building a static model is slow and manual, and preserving spatial continuity across a heterogeneous
-        reservoir is the hardest part of it. GeoPix learns the mapping between properties from models you
-        have already built, then applies it.
-      </p>
-      <p class="intro">
-        The generator is a U-Net: an encoder-decoder with skip connections, so spatial detail survives
-        rather than being averaged away at the bottleneck. The discriminator is a PatchGAN, judging realism
-        patch by patch instead of over the whole image, which forces plausible local texture as well as
-        correct global structure. The same framework fills masked regions of a property grid from the
-        surrounding geology.
-      </p>
-
-      <figure class="trio">
-        <div>
-          <div class="tlabel"><span>Facies</span> — input</div>
-          <img src="assets/poro-input.png" alt="Facies model used as input, sand and shale distribution" loading="lazy">
-        </div>
-        <div>
-          <div class="tlabel p"><span>Porosity</span> — generated</div>
-          <img src="assets/poro-pred.png" alt="Porosity map generated by GeoPix" loading="lazy">
-        </div>
-        <div>
-          <div class="tlabel p"><span>Porosity</span> — measured</div>
-          <img src="assets/poro-truth.png" alt="Measured porosity map" loading="lazy">
-        </div>
-        <figcaption>
-          A second property from the same input. High-porosity bodies appear in the right places; the method
-          over-predicts their extent, which is why we report the per-class metrics below rather than a single
-          accuracy figure.
-        </figcaption>
-      </figure>
+      <h2>How it works</h2>
+      <ol class="how">
+        <li><span class="n">01</span><b>Learn</b><span>Trains on the intervals you have cored and logged.</span></li>
+        <li><span class="n">02</span><b>Translate</b><span>Facies to properties, and properties back to facies.</span></li>
+        <li><span class="n">03</span><b>Decide</b><span>Your geologists review and sign off. Hours, not days.</span></li>
+      </ol>
+      <ul class="gains">
+        <li><b>Faster decisions</b><span>Update a property model the same day.</span></li>
+        <li><b>Less new data</b><span>Start before the next core comes back.</span></li>
+        <li><b>Cheaper uncertainty</b><span>Test a facies scenario in seconds.</span></li>
+      </ul>
     </div>
   </section>
 
-  <section id="results" class="band">
+  <section id="uses" class="band">
     <div class="wrap">
-      <h2>Published benchmarks, not projections</h2>
-      <p class="intro">
-        Measured on the Groningen dataset and reported in <i>Geoenergy Science and Engineering</i>.
-      </p>
+      <h2>One engine for every subsurface model</h2>
+      <div class="uses">
+        <div class="use"><i style="background:#E8A33D"></i><b>Oil &amp; gas</b><span>Uncored intervals and field development.</span></div>
+        <div class="use"><i style="background:#C25A3E"></i><b>Geothermal</b><span>Permeability for well placement.</span></div>
+        <div class="use"><i style="background:#1F7A72"></i><b>Carbon &amp; energy storage</b><span>CO₂, hydrogen and gas storage.</span></div>
+        <div class="use"><i style="background:#2E6FA8"></i><b>Groundwater</b><span>Aquifer characterization.</span></div>
+        <div class="use"><i style="background:#6B5644"></i><b>Mining</b><span>Geological domains and continuity.</span></div>
+        <div class="use"><i style="background:#6A4FB0"></i><b>Digital rocks</b><span>Porous media from rock images.</span></div>
+      </div>
+    </div>
+  </section>
 
+  <section id="results">
+    <div class="wrap">
+      <h2>Published benchmarks, not promises</h2>
+      <p class="intro">Groningen field dataset, <i>Geoenergy Science and Engineering</i> (2026).</p>
       <table>
         <thead>
           <tr><th scope="col">Translation task</th><th scope="col">PA</th><th scope="col">mPA</th><th scope="col">mIoU</th><th scope="col">FWIoU</th></tr>
@@ -630,166 +651,21 @@
           <tr><td>Facies → Water saturation</td><td class="n hi">0.98</td><td class="n">0.33</td><td class="n">0.33</td><td class="n hi">0.97</td></tr>
         </tbody>
       </table>
-
-      <p class="note">
-        PA is pixel accuracy, mPA mean pixel accuracy, mIoU mean intersection over union, FWIoU
-        frequency-weighted IoU. The gap between PA and mPA reflects class imbalance: dominant facies are
-        predicted more reliably than rare ones, so results on thin or uncommon units need checking against
-        well control. Facies → Porosity is the most balanced task and the hardest.
-      </p>
-
-      <div class="cmp-wrap">
-        <h3 class="cmp-h">From one facies slice to the property</h3>
-        <p class="cmp-sub">The facies on the left is the only input. Drag the handle to see what GeoPix generated from it on the same slice, then switch to the reference to check the match.</p>
-
-        <div class="ev-ctl">
-          <div class="cmp-tabs" role="group" aria-label="Property">
-            <button type="button" aria-pressed="true" data-p="poro">Facies → Porosity</button>
-            <button type="button" aria-pressed="false" data-p="perm">Facies → Permeability</button>
-          </div>
-          <div class="cmp-tabs" role="group" aria-label="Compare GeoPix with">
-            <button type="button" aria-pressed="true" data-m="facies">vs facies input</button>
-            <button type="button" aria-pressed="false" data-m="truth">vs reference</button>
-          </div>
-        </div>
-
-        <div class="ev-grid">
-          <div class="compare sq" id="evCmp" style="--pos:100%">
-            <img class="cmp-base" id="evPred" src="assets/ev-poro-pred.png" alt="Porosity generated by GeoPix from the facies slice" width="720" height="720">
-            <div class="cmp-top"><img id="evTop" src="assets/ev-poro-facies.png" alt="Facies slice used as input, same slice" width="720" height="720"></div>
-            <div class="cmp-line" aria-hidden="true"><span class="cmp-grip"></span></div>
-            <span class="cmp-tag l" id="evTagL">Facies · input</span>
-            <span class="cmp-tag r" id="evTagR">GeoPix porosity</span>
-            <input class="cmp-range" id="evRange" type="range" min="0" max="100" value="100" step="0.1" aria-label="Drag to compare the input with the GeoPix output">
-          </div>
-          <div class="ev-side">
-            <div class="lgd"><span class="lgd-h">Facies</span>
-              <span><i style="background:#808080"></i>Shale</span><span><i style="background:#F8A808"></i>Shaly sand</span><span><i style="background:#F8F808"></i>Sand</span></div>
-            <div class="lgd"><span class="lgd-h" id="evLgH">Porosity</span>
-              <span class="ramp"><b id="evLo">0.04</b><i id="evRamp" style="background:linear-gradient(90deg,#0000A8,#0008F8,#00C8F8,#08F890,#C8F808,#F8D808,#F87808,#C80808)"></i><b id="evHi">0.14 v/v</b></span></div>
-            <div class="ev-stat"><b id="evPA">0.58</b><span id="evPAl">pixel accuracy, facies → porosity</span></div>
-            <p class="ev-note">One slice of the Groningen field model, from Al-Fakih et al. (2026), <i>Geoenergy Science and Engineering</i>.</p>
-          </div>
-        </div>
-      </div>
+      <p class="note">PA: pixel accuracy · mPA: mean pixel accuracy · mIoU: mean intersection over union · FWIoU: frequency-weighted IoU.</p>
     </div>
   </section>
 
-  <section id="uses">
+  <section id="engagement" class="band">
     <div class="wrap">
-      <h2>One engine for every subsurface model</h2>
-      <p class="intro">Wherever a property model has to be built from sparse data, the same facies-to-property engine applies. Validated on reservoir datasets; each new domain starts with a benchmark on the customer's own data.</p>
-      <div class="uses">
-        <div class="use"><i style="background:#E8A33D"></i><b>Oil &amp; gas</b><span>Reservoir characterization, uncored intervals and field development.</span></div>
-        <div class="use"><i style="background:#C25A3E"></i><b>Geothermal</b><span>Resource assessment and permeability models for well placement.</span></div>
-        <div class="use"><i style="background:#1F7A72"></i><b>Carbon &amp; energy storage</b><span>Capacity and injectivity for CO₂, hydrogen and gas storage.</span></div>
-        <div class="use"><i style="background:#2E6FA8"></i><b>Groundwater</b><span>Aquifer characterization and subsurface planning.</span></div>
-        <div class="use"><i style="background:#6B5644"></i><b>Mining</b><span>Geological domains and resource continuity.</span></div>
-        <div class="use"><i style="background:#6A4FB0"></i><b>Digital rocks</b><span>Porous-media properties from rock images.</span></div>
-      </div>
-    </div>
-  </section>
-
-  <section id="compare">
-    <div class="wrap">
-      <h2>Against the workflow you run now</h2>
-      <p class="intro">
-        For one property across a gridded reservoir model, measured during validation with a national oil company.
-      </p>
-
-      <table class="cmp">
-        <thead>
-          <tr><th scope="col"></th><th scope="col">Conventional workflow</th><th scope="col">With GeoPix</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Time per property</td><td>2–5 days</td><td class="win">Under 2 hours</td></tr>
-          <tr><td>Interpreter input</td><td>Continuous</td><td class="win">Set-up and review</td></tr>
-          <tr><td>Repeat for a second property</td><td>Repeat the cycle</td><td class="win">Re-run the model</td></tr>
-          <tr><td>Reproducible from the same inputs</td><td>Depends on the interpreter</td><td class="win">Deterministic</td></tr>
-          <tr><td>Handles a property that is missing entirely</td><td>Geostatistical infill</td><td class="win">Reconstructed from surrounding geology</td></tr>
-        </tbody>
-      </table>
-      <p class="note">
-        GeoPix does not replace the interpreter. It removes the repetitive part of the cycle so the time goes into
-        judging the result instead of producing it. Outputs still need checking against well control, particularly
-        on thin or uncommon units.
-      </p>
-    </div>
-  </section>
-
-  <section id="status">
-    <div class="wrap">
-      <h2>What we offer today</h2>
-      <p class="intro">Stated plainly, because a technical evaluator finds out either way.</p>
-
-      <ul class="status">
-        <li>
-          <span class="tag now">Available</span>
-          <div>
-            <h3>Benchmarking on your reservoir</h3>
-            <p>We run the method against your existing geomodeling workflow on your own gridded data, under NDA, and report where it holds and where it does not.</p>
-          </div>
-        </li>
-        <li>
-          <span class="tag now">Available</span>
-          <div>
-            <h3>Pix2Geomodel implementation</h3>
-            <p>Trained models for facies-to-property and property-to-facies translation, plus masked reconstruction, with the published benchmarks reproducible from open code.</p>
-          </div>
-        </li>
-        <li>
-          <span class="tag dev">In development</span>
-          <div>
-            <h3>Batch inference and workflow tooling</h3>
-            <p>Preprocessing, batch processing and integration for teams running this across many models.</p>
-          </div>
-        </li>
-        <li>
-          <span class="tag dev">In development</span>
-          <div>
-            <h3>Geothermal and CO₂ storage</h3>
-            <p>Extending the framework beyond hydrocarbon reservoirs.</p>
-          </div>
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <section id="engagement">
-    <div class="wrap">
-      <h2>How an engagement runs</h2>
-      <p class="intro">Four weeks from your model to a report you can act on. No licence to buy before you know whether it works.</p>
-
-      <ol class="steps">
-        <li>
-          <div class="sn">Week 1</div>
-          <div>
-            <h3>NDA and data handover</h3>
-            <p>You send a gridded model with at least two properties. Facies plus porosity is the usual starting point. Data stays in your environment if that is a requirement.</p>
-          </div>
-        </li>
-        <li>
-          <div class="sn">Week 2</div>
-          <div>
-            <h3>Training on your reservoir</h3>
-            <p>We fit the model to your field rather than applying a generic one, and hold out a region you choose as a blind test.</p>
-          </div>
-        </li>
-        <li>
-          <div class="sn">Week 3</div>
-          <div>
-            <h3>Blind comparison</h3>
-            <p>Generated properties against your held-out ground truth, scored with the same metrics we publish, zone by zone.</p>
-          </div>
-        </li>
-        <li>
-          <div class="sn">Week 4</div>
-          <div>
-            <h3>Report and the honest verdict</h3>
-            <p>Where it matched, where it did not, and whether it is worth putting into your workflow. If the answer is no, we say so.</p>
-          </div>
-        </li>
+      <h2>Start with a 4-week benchmark</h2>
+      <p class="intro">Your data, your workflow as the baseline. No licence until it proves itself.</p>
+      <ol class="weeks">
+        <li><span>Week 1</span><b>NDA and data</b></li>
+        <li><span>Week 2</span><b>Train on your field</b></li>
+        <li><span>Week 3</span><b>Blind test</b></li>
+        <li><span>Week 4</span><b>Clear verdict</b></li>
       </ol>
+      <a class="btn btn-a" href="#contact">Book a benchmark</a>
     </div>
   </section>
 
@@ -799,104 +675,86 @@
       <div class="vm">
         <div class="vm-item">
           <span class="vm-k">Vision</span>
-          <p class="vm-t">Every subsurface model built from the data already in hand, for oil and gas, CO₂ storage, geothermal energy and groundwater, starting in Saudi Arabia.</p>
+          <p class="vm-t">Every subsurface model built from the data already in hand.</p>
         </div>
         <div class="vm-item">
           <span class="vm-k">Mission</span>
-          <p class="vm-t">Give geomodelers a property engine they can check: published methods, blind benchmarks on each customer's own reservoir, and the geologist in charge of every result.</p>
+          <p class="vm-t">A property engine geologists can trust: published, benchmarked, and always under expert control.</p>
         </div>
       </div>
-      <ul class="vals">
-        <li><b>Checkable claims</b><span>Every number on this site traces to a paper or a benchmark you can repeat.</span></li>
-        <li><b>The geologist decides</b><span>GeoPix proposes property models. Experts review, challenge and sign off.</span></li>
-        <li><b>Your data stays yours</b><span>Benchmarks run under NDA. Data and outputs belong to the owner.</span></li>
-      </ul>
     </div>
   </section>
 
   <section id="team" class="band">
     <div class="wrap">
       <h2>Who builds it</h2>
-
       <div class="team">
         <div class="member">
           <img src="assets/team-alfakih.png" alt="" width="104" height="104" loading="lazy">
           <div>
             <h3>Abdulrahman Al-Fakih</h3>
             <div class="role">Founder &amp; CEO</div>
-            <p>PhD geophysics, KFUPM. Created the Pix2Geomodel method and led its validation with a national oil company, cutting static modeling from days to under two hours. Project manager on subsurface AI research. Previously a reservoir, wireline and production engineer on producing fields in Yemen.</p>
+            <p>Geophysicist and AI researcher. Creator of Pix2Geomodel.</p>
           </div>
         </div>
-
         <div class="member">
           <img src="assets/team-nabil.png" alt="" width="104" height="104" loading="lazy">
           <div>
             <h3>Nabil Saraih</h3>
             <div class="role">Co-Founder</div>
-            <p>Ten years in petroleum geoscience. Built integrated static and dynamic reservoir models at TOTAL Energies, and worked as a geoscientist and software engineer at Schlumberger. PhD geology, KFUPM. Works daily in Petrel, Techlog, Petromod and Eclipse.</p>
+            <p>Reservoir geomodeler. Formerly TotalEnergies and Schlumberger.</p>
           </div>
         </div>
-
         <div class="member">
           <img src="assets/team-ardi.png" alt="" width="104" height="104" loading="lazy">
           <div>
             <h3>Ardiansyah Koeshidayatullah</h3>
             <div class="role">Scientific &amp; Technical Lead</div>
-            <p>Associate Professor at KFUPM and former Stanford postdoctoral fellow. Leads the PREDICT group on AI in geosciences. Associate Editor, <i>JGR: Machine Learning and Computation</i>.</p>
+            <p>Associate Professor, KFUPM. AI for geosciences, ex-Stanford.</p>
           </div>
         </div>
-
       </div>
 
       <h3 class="adv-h">Advisory board</h3>
-      <p class="adv-sub">Senior researchers who guide our science and direction. They advise GeoPix AI externally and are not part of the operating team.</p>
       <div class="advisors">
         <div class="adv">
           <img src="assets/team-kaka.png" alt="" width="84" height="84" loading="lazy">
           <h3>SanLinn I. Kaka</h3>
           <div class="role">Scientific Advisor</div>
-          <p>Associate Professor at KFUPM, PhD Carleton. Twenty years in reservoir characterization and monitoring, microseismic analysis, and AI in geophysics.</p>
+          <p>Reservoir characterization and microseismic monitoring.</p>
         </div>
         <div class="adv">
           <img src="assets/team-hanafy.png" alt="" width="84" height="84" loading="lazy">
           <h3>Sherif M. Hanafy</h3>
           <div class="role">Advisor, Geophysics &amp; Seismic AI</div>
-          <p>Associate Professor and Geophysics Program Leader at KFUPM. Previously a senior research scientist at KAUST, where he founded the Seismology Lab. Works on seismic imaging and machine learning for seismic and GPR data.</p>
+          <p>Geophysics Program Leader, KFUPM. Founded the KAUST Seismology Lab.</p>
         </div>
         <div class="adv">
           <img src="assets/team-amin.png" alt="" width="84" height="84" loading="lazy">
           <h3>Amin Al Fakih</h3>
           <div class="role">Advisor, Porous Materials &amp; Carbon Storage</div>
-          <p>Assistant Professor of Civil and Environmental Engineering at KFUPM and research scholar at its centre for construction and building materials. Over 100 publications on concrete, geopolymers and CO₂ in cementitious materials.</p>
+          <p>Civil and environmental engineering, KFUPM. 100+ publications.</p>
         </div>
       </div>
-
-      <p class="collab">
-        Developed through research collaborations with KFUPM, the SDAIA–KFUPM Joint Research Center for AI,
-        Stanford University, and a national oil company.
-      </p>
     </div>
   </section>
 
   <section id="milestones">
     <div class="wrap">
       <h2>Where we are</h2>
-
       <ul class="time">
-        <li><span class="when">2023</span><span class="what">First machine-learning reservoir property prediction published, <i>IEEE Access</i></span></li>
-        <li><span class="when">2024</span><span class="what">Pix2Geomodel development begins with a national oil company</span></li>
-        <li><span class="when">2025</span><span class="what">Patent application filed</span></li>
-        <li><span class="when">Mar 2025</span><span class="what">Sequence-based GANs for well log generation published, <i>Scientific Reports</i></span></li>
-        <li><span class="when">Dec 2025</span><span class="what">Validation complete: static modeling cycle cut from days to under two hours</span></li>
+        <li><span class="when">2024</span><span class="what">Pix2Geomodel development with a national oil company</span></li>
+        <li><span class="when">2025</span><span class="what">US patent application filed</span></li>
+        <li><span class="when">Dec 2025</span><span class="what">Validation complete: modeling cut to under two hours</span></li>
         <li><span class="when">2026</span><span class="what">Pix2Geomodel published, <i>Geoenergy Science and Engineering</i></span></li>
-        <li class="key"><span class="when">Oct 2026</span><span class="what"><b>Selected for the Deep-Tech Ventures Program at Dhahran Techno Valley, from more than 230 applications</b></span></li>
+        <li class="key"><span class="when">Oct 2026</span><span class="what"><b>Selected for the Deep-Tech Ventures Program, Dhahran Techno Valley</b></span></li>
       </ul>
     </div>
   </section>
 
   <section id="research" class="band">
     <div class="wrap">
-      <h2>Everything here is checkable</h2>
+      <h2>Peer-reviewed and patent-pending</h2>
 
       <ul class="refs">
         <li>
@@ -927,10 +785,7 @@
   <section id="contact">
     <div class="wrap">
       <h2>Bring us a reservoir</h2>
-      <p class="intro">
-        If you are assessing whether generative models fit your geomodeling workflow, send us a model and we
-        will benchmark the method against it under NDA. We will tell you where it works and where it does not.
-      </p>
+      <p class="intro">Send a model. We benchmark GeoPix against your workflow under NDA and tell you straight whether it fits.</p>
 
       <div class="contact-grid">
         <div>
