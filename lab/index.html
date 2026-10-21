@@ -1,0 +1,326 @@
+<meta charset="utf-8">
+<title>GeoPix Reservoir Lab</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: full-window 3D viewport of the real Groningen model; controls float left, info panel right. One dark visual world by design. */
+:root{
+  --bg:#070C16; --panel:rgba(13,20,34,.9); --panel-2:rgba(255,255,255,.05); --line:rgba(255,255,255,.10);
+  --ink:#E8EDF5; --dim:#93A0B5; --amber:#E8A33D; --teal:#3FB0A4; --slow:#E07A62;
+  --display:"Archivo",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--display);overflow:hidden}
+#scene{position:fixed;inset:0}
+#scene canvas{display:block}
+.topbar{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));background:linear-gradient(180deg,rgba(7,12,22,.95),rgba(7,12,22,0))}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;letter-spacing:-.01em}
+.brand b{color:var(--amber);font-weight:800}
+.brand small{font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-left:6px}
+.tabs{display:flex;gap:4px;background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:4px}
+.tabs button{font:600 13px var(--display);color:var(--dim);background:none;border:0;border-radius:999px;padding:7px 14px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--ink);color:#0B1322}
+.rail,.info{position:fixed;z-index:4;background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:14px}
+.rail{left:max(16px,env(safe-area-inset-left,0px));top:70px;width:270px;padding:16px;display:flex;flex-direction:column;gap:16px;max-height:calc(100% - 90px);overflow:auto}
+.info{right:max(16px,env(safe-area-inset-right,0px));top:70px;width:340px;padding:18px;max-height:calc(100% - 90px);overflow:auto;display:flex;flex-direction:column;gap:14px}
+.lab{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
+.grp{display:flex;flex-direction:column;gap:8px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.seg.two{grid-template-columns:1fr 1fr}
+.seg button,.chip{font:600 12.5px var(--display);color:var(--ink);background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:8px 4px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:rgba(232,163,61,.18);border-color:var(--amber);color:#F6C77A}
+.run{font:800 15px var(--display);background:var(--amber);color:#1A1205;border:0;border-radius:10px;padding:12px;cursor:pointer}
+.run:disabled{opacity:.6;cursor:default}
+.clock{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.clock div{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:8px}
+.clock span{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim)}
+.clock b{font:500 18px var(--mono)}
+.clock .g b{color:var(--teal)}
+.clock .c b{color:var(--slow)}
+.sl{display:grid;grid-template-columns:24px 1fr 34px;align-items:center;gap:8px;font-size:12.5px;color:var(--dim)}
+.sl input{width:100%;accent-color:var(--amber)}
+.sl output{font:500 12px var(--mono);text-align:right}
+.tog{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:13.5px;font-weight:600}
+.tog input{accent-color:var(--amber);width:18px;height:18px}
+button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.legend{position:fixed;z-index:4;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 16px;display:flex;align-items:center;gap:14px;font-size:12.5px;color:var(--dim);white-space:nowrap}
+.legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px}
+.legend .ramp{display:inline-block;width:150px;height:10px;border-radius:2px;vertical-align:-1px;margin:0 8px}
+.tag{font:600 11px var(--display);letter-spacing:.08em;text-transform:uppercase;color:#F6C77A}
+.info h2{margin:0;font-size:21px;line-height:1.2;letter-spacing:-.01em}
+.info p{margin:0;font-size:14px;line-height:1.55;color:#C6CFDC}
+.info ol,.info ul{margin:0;padding-left:18px;font-size:14px;line-height:1.55;color:#C6CFDC;display:flex;flex-direction:column;gap:6px}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.kv div{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px}
+.kv span{display:block;font-size:11px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
+.kv b{font:500 19px var(--mono)}
+.field{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:13px;color:#C6CFDC}
+.field input{font:500 14px var(--mono);background:var(--panel-2);border:1px solid var(--line);border-radius:6px;color:var(--ink);padding:6px 8px;width:100%}
+.note{font-size:12px!important;color:var(--dim)!important}
+.cta{display:block;text-align:center;text-decoration:none;font:800 14px var(--display);background:var(--amber);color:#1A1205;border-radius:10px;padding:11px}
+.welllabel{position:fixed;z-index:3;pointer-events:none;font:700 11px var(--display);color:#fff;background:rgba(11,19,34,.85);border:1px solid var(--line);border-radius:4px;padding:2px 6px;transform:translate(-50%,-140%)}
+#logs canvas{width:100%;height:300px;display:block;background:rgba(0,0,0,.25);border-radius:8px}
+.hint{font-size:12px;color:var(--dim);margin:0}
+.sweep{position:fixed;z-index:4;left:50%;top:76px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:12.5px;color:var(--dim)}
+.loading{position:fixed;inset:0;display:grid;place-items:center;z-index:6;font-size:15px;color:var(--dim);background:var(--bg)}
+.embed .info{display:none}.embed.info-open .info{display:flex}
+@media (max-width:900px){
+  .rail{top:auto;bottom:62px;left:12px;right:12px;width:auto;max-height:38%}
+  .info{top:64px;left:12px;right:12px;width:auto;max-height:30%}
+  .legend{bottom:12px;max-width:calc(100% - 24px);overflow:auto}
+  .brand small{display:none}
+  .tabs button{padding:6px 10px}
+}
+</style>
+
+<div id="scene" role="img" aria-label="3D view of the Groningen reservoir model with wells; drag to rotate, scroll to zoom"></div>
+<div class="loading" id="loading">Loading the Groningen reservoir model…</div>
+
+<div class="topbar">
+  <div class="brand">GeoPix <b>AI</b> <small>Reservoir Lab</small></div>
+  <div class="tabs" role="tablist" aria-label="Panels">
+    <button role="tab" aria-selected="true" data-tab="explore">Explore</button>
+    <button role="tab" aria-selected="false" data-tab="tech">Technical</button>
+    <button role="tab" aria-selected="false" data-tab="biz">Business</button>
+  </div>
+</div>
+
+<div class="sweep" id="sweep" hidden></div>
+
+<aside class="rail" aria-label="Model controls">
+  <div class="grp">
+    <span class="lab">Show</span>
+    <div class="seg" id="propSeg">
+      <button aria-pressed="true" data-prop="facies">Facies</button>
+      <button aria-pressed="false" data-prop="phi">Porosity</button>
+      <button aria-pressed="false" data-prop="perm">Perm.</button>
+    </div>
+  </div>
+  <div class="grp">
+    <span class="lab">GeoPix translation</span>
+    <div class="seg two" id="dirSeg">
+      <button aria-pressed="true" data-dir="fwd">Facies → property</button>
+      <button aria-pressed="false" data-dir="inv">Property → facies</button>
+    </div>
+    <button class="run" id="runBtn">Run GeoPix</button>
+    <div class="clock">
+      <div class="g"><span>GeoPix</span><b id="clkG">0:00 h</b></div>
+      <div class="c"><span>Conventional</span><b id="clkC">0.0 days</b></div>
+    </div>
+  </div>
+  <div class="grp">
+    <span class="lab">Slice the model</span>
+    <label class="sl"><span>I</span><input id="sI" type="range" min="1" max="158" value="158"><output id="oI">158</output></label>
+    <label class="sl"><span>J</span><input id="sJ" type="range" min="1" max="131" value="131"><output id="oJ">131</output></label>
+    <label class="sl"><span>K</span><input id="sK" type="range" min="0" max="58" value="0"><output id="oK">0</output></label>
+  </div>
+  <div class="grp">
+    <label class="tog">Sand bodies only <input type="checkbox" id="bodies"></label>
+    <label class="tog">Show wells <input type="checkbox" id="wellsT" checked></label>
+    <label class="sl"><span>VE</span><input id="ve" type="range" min="0.2" max="2" step="0.1" value="0.6"><output id="oVE">0.6×</output></label>
+  </div>
+  <p class="hint">Drag to rotate · scroll to zoom · click a well head for its logs</p>
+</aside>
+
+<aside class="info" id="info" aria-live="polite"></aside>
+<div class="legend" id="legend"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+(async()=>{
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------------- real data: NAM Groningen static model V6 (public), every 4th cell ---------------- */
+let meta,buf;
+try{
+  meta=await (await fetch('groningen.json')).json();
+  const b64=(await (await fetch('groningen.b64.txt')).text()).trim();
+  const raw=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  buf=new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
+}catch(e){document.getElementById('loading').textContent='Could not load the reservoir model. Reload the page to try again.';return}
+const NI=meta.NI,NJ=meta.NJ,NK=meta.NK,N=NI*NJ*NK;
+const FAC=buf.subarray(0,N),PHI=buf.subarray(N,2*N),LK=buf.subarray(2*N,3*N);
+const id=(i,j,k)=>(k*NJ+j)*NI+(NI-1-i); // mirrored to match published map orientation
+const phiV=q=>PHI[q]*meta.phi_scale, lkV=q=>meta.logk_min+LK[q]*meta.logk_span;
+const SAND=0, NA=255;
+
+/* ---------------- colour scales (published GeoPix legends) ---------------- */
+const hex=h=>[parseInt(h.slice(1,3),16)/255,parseInt(h.slice(3,5),16)/255,parseInt(h.slice(5,7),16)/255];
+const JET=['#0000A8','#0008F8','#00C8F8','#08F890','#C8F808','#F8D808','#F87808','#C80808'].map(hex);
+const PJET=[hex('#A000C8'),...JET.slice(1)];
+const FC=[hex('#F8F808'),hex('#F8A808'),hex('#808080')]; // sand, shaly sand, shale
+const FN=meta.facies;
+function ramp(st,t){t=Math.min(1,Math.max(0,t))*(st.length-1);const a=Math.min(st.length-2,t|0),f=t-a,c0=st[a],c1=st[a+1];return[c0[0]+(c1[0]-c0[0])*f,c0[1]+(c1[1]-c0[1])*f,c0[2]+(c1[2]-c0[2])*f]}
+const PHI_LO=.02,PHI_HI=.26,LK_LO=-2,LK_HI=3;
+const COLOR={facies:q=>FC[FAC[q]],phi:q=>ramp(JET,(phiV(q)-PHI_LO)/(PHI_HI-PHI_LO)),perm:q=>ramp(PJET,(lkV(q)-LK_LO)/(LK_HI-LK_LO))};
+
+/* ---------------- state ---------------- */
+const S={prop:'facies',dir:'fwd',run:-1,i1:NI,j1:NJ,k0:0,ve:0.6,bodies:false,wells:true,tab:'explore',well:null};
+function cellColor(q,k){
+  let p=S.prop;
+  if(S.run>=0){const done=k<S.k0+S.run*(NK-S.k0);p=done?S.target:S.source}
+  return COLOR[p](q);
+}
+
+/* ---------------- scene ---------------- */
+const host=document.getElementById('scene');
+const renderer=new THREE.WebGLRenderer({antialias:true});
+renderer.setPixelRatio(Math.min(2,devicePixelRatio||1));host.appendChild(renderer.domElement);
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x070C16);
+const camera=new THREE.PerspectiveCamera(36,1,0.5,3000);camera.position.set(-120,150,230);
+const controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.maxPolarAngle=Math.PI*.49;
+const setTarget=()=>controls.target.set(NI/2,NK*S.ve/2,NJ/2);setTarget();
+scene.add(new THREE.HemisphereLight(0xe6ecff,0x1a1f2a,.95));
+const sun=new THREE.DirectionalLight(0xffffff,.55);sun.position.set(-80,200,120);scene.add(sun);
+const grid=new THREE.GridHelper(420,28,0x223047,0x141d2e);grid.position.set(NI/2,-.1,NJ/2);scene.add(grid);
+
+let mesh=null,cap=0,shown=null;
+const geo=new THREE.BoxGeometry(1,1,1),mat=new THREE.MeshLambertMaterial();
+const yC=k=>(NK-k-.5)*S.ve;
+function inCrop(i,j,k){return i>=0&&j>=0&&k>=S.k0&&i<S.i1&&j<S.j1&&k<NK}
+function keep(q){return S.bodies?FAC[q]===SAND:FAC[q]!==NA}
+function visibleCells(){
+  const out=[];
+  for(let k=S.k0;k<NK;k++)for(let j=0;j<S.j1;j++)for(let i=0;i<S.i1;i++){
+    const q=id(i,j,k);if(!keep(q))continue;
+    const nb=[[i+1,j,k],[i-1,j,k],[i,j+1,k],[i,j-1,k],[i,j,k+1],[i,j,k-1]];
+    for(const[a,b,c]of nb){if(!inCrop(a,b,c)||!keep(id(a,b,c))){out.push(q);break}}
+  }
+  return out;
+}
+function rebuild(){
+  shown=visibleCells();
+  if(shown.length>cap){if(mesh){scene.remove(mesh);mesh.dispose()}cap=Math.ceil(shown.length*1.3);mesh=new THREE.InstancedMesh(geo,mat,cap);mesh.instanceColor=new THREE.InstancedBufferAttribute(new Float32Array(cap*3),3);scene.add(mesh)}
+  const M=mesh.instanceMatrix.array;
+  for(let n=0;n<shown.length;n++){const q=shown[n],k=(q/(NI*NJ))|0,r=q%(NI*NJ),j=(r/NI)|0,i=r%NI,o=n*16;
+    M[o]=1;M[o+1]=0;M[o+2]=0;M[o+3]=0;M[o+4]=0;M[o+5]=S.ve;M[o+6]=0;M[o+7]=0;M[o+8]=0;M[o+9]=0;M[o+10]=1;M[o+11]=0;M[o+12]=i+.5;M[o+13]=yC(k);M[o+14]=j+.5;M[o+15]=1}
+  mesh.count=shown.length;mesh.instanceMatrix.needsUpdate=true;recolor();placeWells();
+}
+function recolor(){
+  const C=mesh.instanceColor.array;
+  for(let n=0;n<shown.length;n++){const q=shown[n],k=(q/(NI*NJ))|0,c=cellColor(q,k);C[n*3]=c[0];C[n*3+1]=c[1];C[n*3+2]=c[2]}
+  mesh.instanceColor.needsUpdate=true;
+}
+
+/* wells on real columns */
+const WELLS=[{n:'W-1',i:110,j:32},{n:'W-2',i:71,j:58},{n:'W-3',i:102,j:91},{n:'W-4',i:47,j:39}];
+const wellGroup=new THREE.Group();scene.add(wellGroup);const labels=[];
+WELLS.forEach(w=>{
+  w.tube=new THREE.Mesh(new THREE.CylinderGeometry(.6,.6,1,10),new THREE.MeshLambertMaterial({color:0xE8EDF5}));
+  w.head=new THREE.Mesh(new THREE.SphereGeometry(1.8,16,12),new THREE.MeshLambertMaterial({color:0xE8A33D}));
+  w.tube.userData.well=w.head.userData.well=w;wellGroup.add(w.tube,w.head);
+  const el=document.createElement('div');el.className='welllabel';el.textContent=w.n;document.body.appendChild(el);labels.push([w,el]);
+});
+function placeWells(){WELLS.forEach(w=>{const h=NK*S.ve+22;w.tube.scale.set(1,h,1);w.tube.position.set(w.i+.5,h/2,w.j+.5);w.head.position.set(w.i+.5,h,w.j+.5)})}
+
+function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
+addEventListener('resize',resize);resize();
+const v3=new THREE.Vector3();
+function loop(){controls.update();renderer.render(scene,camera);
+  labels.forEach(([w,el])=>{v3.copy(w.head.position).project(camera);const vis=S.wells&&v3.z<1;el.hidden=!vis;if(vis){el.style.left=((v3.x+1)/2*innerWidth)+'px';el.style.top=((1-v3.y)/2*innerHeight)+'px'}});
+  requestAnimationFrame(loop)}
+rebuild();loop();document.getElementById('loading').remove();
+
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();let downAt=null;
+renderer.domElement.addEventListener('pointerdown',e=>{downAt=[e.clientX,e.clientY]});
+renderer.domElement.addEventListener('pointerup',e=>{
+  if(!downAt||Math.hypot(e.clientX-downAt[0],e.clientY-downAt[1])>5||!S.wells)return;
+  mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);ray.setFromCamera(mouse,camera);
+  const hit=ray.intersectObjects(wellGroup.children)[0];
+  if(hit){document.body.classList.add('info-open');S.well=hit.object.userData.well;S.tab='explore';syncTabs();renderInfo()}
+});
+
+/* ---------------- legend ---------------- */
+const css=st=>'linear-gradient(90deg,'+st.map(c=>`rgb(${c.map(v=>Math.round(v*255))})`).join(',')+')';
+function legend(){const el=document.getElementById('legend'),p=S.prop;
+  if(p==='facies')el.innerHTML=FN.map((n,i)=>`<span><i class="sw" style="background:rgb(${FC[i].map(v=>Math.round(v*255))})"></i>${n}</span>`).join('');
+  if(p==='phi')el.innerHTML=`<span>Porosity</span><span>${PHI_LO}<i class="ramp" style="background:${css(JET)}"></i>${PHI_HI} v/v</span>`;
+  if(p==='perm')el.innerHTML=`<span>Permeability</span><span>0.01<i class="ramp" style="background:${css(PJET)}"></i>1000 mD</span>`;
+  el.innerHTML+='<span class="tag">Groningen field · NAM public model</span>';
+}
+
+/* ---------------- info panel ---------------- */
+const info=document.getElementById('info');
+function renderInfo(){
+  if(S.tab==='explore'){
+    if(S.well){
+      info.innerHTML=`<span class="tag">Well column</span><h2>${S.well.n}</h2>
+        <div id="logs"><canvas width="600" height="600" aria-label="Facies, porosity and permeability down ${S.well.n}"></canvas></div>
+        <p class="note">Facies · porosity · log permeability through all ${NK} layers at this location, from the Groningen model.</p>
+        <button class="chip" id="closeWell">Back to overview</button>`;
+      drawLogs(S.well);document.getElementById('closeWell').onclick=()=>{S.well=null;renderInfo()};return;
+    }
+    info.innerHTML=`<span class="tag">Explore</span><h2>The Groningen gas field, cell by cell</h2>
+      <p>This is the real static reservoir model of the Groningen field, released publicly by NAM: sand, shaly sand and shale with their porosity and permeability.</p>
+      <ul><li>Press <b>Run GeoPix</b> to watch facies turn into a property model, layer by layer.</li><li>Slice with I, J and K to look inside.</li><li><b>Sand bodies only</b> shows the reservoir rock in 3D.</li><li>Click a well head for its logs.</li></ul>
+      <p class="note">Every 4th cell of the NAM Groningen model V6 is shown. The animation illustrates the workflow; the property values are the model's own reference values.</p>`;
+  }
+  if(S.tab==='tech'){
+    info.innerHTML=`<span class="tag">Technical</span><h2>Pix2Geomodel</h2>
+      <p>A conditional GAN trained on this field: it learns how porosity and permeability follow facies, layer by layer, then generates them where data is missing.</p>
+      <ol><li><b>Data:</b> map slices of the Groningen model, facies paired with each property.</li><li><b>Generator:</b> U-Net encoder–decoder with skip connections.</li><li><b>Discriminator:</b> PatchGAN, judging realism patch by patch.</li><li><b>Output:</b> porosity or permeability on the same grid, or facies back from a property.</li><li><b>QC:</b> wells, distributions and variograms before sign-off.</li></ol>
+      <p>Peer-reviewed: Al-Fakih et al. (2026), <i>Geoenergy Science and Engineering</i>, doi.org/10.1016/j.geoen.2025.214342. US patent application filed.</p>
+      <p class="note">Data: NAM Groningen static reservoir model V6, public release.</p>`;
+  }
+  if(S.tab==='biz'){
+    info.innerHTML=`<span class="tag">Business</span><h2>What faster modelling is worth</h2>
+      <p>Enter your own numbers. The defaults are examples only.</p>
+      <label class="field">Property models per year<input id="fModels" type="number" min="0" value="20"></label>
+      <label class="field">Hours per model today<input id="fHrs" type="number" min="0" value="24"></label>
+      <label class="field">Hours with GeoPix<input id="fG" type="number" min="0" value="2"></label>
+      <label class="field">Cost per hour (USD)<input id="fCost" type="number" min="0" value="150"></label>
+      <div class="kv"><div><span>Hours back / year</span><b id="rH">–</b></div><div><span>Days back / year</span><b id="rD">–</b></div><div><span>Saved / year</span><b id="rC">–</b></div><div><span>Faster</span><b id="rX">–</b></div></div>
+      <p>Built for oil &amp; gas, geothermal, CO₂ and energy storage, groundwater, mining and digital rocks.</p>
+      <a class="cta" href="https://geopix-ai.com/#contact" target="_top">Start a 4-week benchmark</a>
+      <p class="note">Benchmark on your data, under NDA. No licence until it proves itself.</p>`;
+    const f=()=>{const v=n=>+document.getElementById(n).value||0,m=v('fModels'),h=v('fHrs'),g=v('fG'),c=v('fCost'),s=Math.max(0,(h-g)*m);
+      rH.textContent=Math.round(s).toLocaleString();rD.textContent=Math.round(s/8);rC.textContent='$'+Math.round(s*c).toLocaleString();rX.textContent=g>0?(h/g).toFixed(1)+'×':'–'};
+    ['fModels','fHrs','fG','fCost'].forEach(n=>document.getElementById(n).addEventListener('input',f));f();
+  }
+}
+function drawLogs(w){
+  const cv=info.querySelector('canvas'),c=cv.getContext('2d'),W=cv.width,H=cv.height,top=34,bot=H-12,hk=(bot-top)/NK;
+  c.clearRect(0,0,W,H);c.font='600 18px Archivo, sans-serif';c.fillStyle='#93A0B5';
+  [['Facies',10,100],['Porosity',130,220],['log k (mD)',370,220]].forEach(([n,x,tw])=>{c.fillText(n,x,22);c.strokeStyle='rgba(255,255,255,.12)';c.strokeRect(x,top,tw,bot-top)});
+  for(let k=0;k<NK;k++){const q=id(w.i,w.j,k);if(FAC[q]===NA)continue;c.fillStyle=`rgb(${FC[FAC[q]].map(v=>Math.round(v*255))})`;c.fillRect(10,top+k*hk,100,hk+.5)}
+  const curve=(x,tw,val,col)=>{c.beginPath();let st=false;for(let k=0;k<NK;k++){const q=id(w.i,w.j,k);if(FAC[q]===NA){st=false;continue}const yy=top+(k+.5)*hk,xx=x+Math.min(1,Math.max(0,val(q)))*tw;st?c.lineTo(xx,yy):c.moveTo(xx,yy);st=true}c.strokeStyle=col;c.lineWidth=3;c.stroke()};
+  curve(130,220,q=>(phiV(q)-PHI_LO)/(PHI_HI-PHI_LO),'#3FB0A4');curve(370,220,q=>(lkV(q)-LK_LO)/(LK_HI-LK_LO),'#E8A33D');
+}
+
+/* ---------------- controls ---------------- */
+const $=s=>document.querySelector(s);
+function syncTabs(){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===S.tab)))}
+const EMB=window.self!==window.top||/[?&]embed/.test(location.search);if(EMB)document.body.classList.add('embed');
+const openInfo=()=>document.body.classList.add('info-open');
+$('.tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(EMB&&S.tab===b.dataset.tab&&document.body.classList.contains('info-open')){document.body.classList.remove('info-open');return}openInfo();S.tab=b.dataset.tab;if(S.tab!=='explore')S.well=null;syncTabs();renderInfo()});
+function setProp(p){S.prop=p;document.querySelectorAll('#propSeg button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.prop===p)));legend();recolor();if(S.well)drawLogs(S.well)}
+$('#propSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&S.run<0)setProp(b.dataset.prop)});
+$('#dirSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||S.run>=0)return;S.dir=b.dataset.dir;document.querySelectorAll('#dirSeg button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});
+let pend=null;const later=()=>{cancelAnimationFrame(pend);pend=requestAnimationFrame(rebuild)};
+const bind=(sel,out,fn,fmt=v=>v)=>{const el=$(sel);el.addEventListener('input',()=>{fn(+el.value);$(out).textContent=fmt(el.value);later()})};
+bind('#sI','#oI',v=>S.i1=v);bind('#sJ','#oJ',v=>S.j1=v);bind('#sK','#oK',v=>S.k0=v);
+bind('#ve','#oVE',v=>{S.ve=v;setTarget()},v=>v+'×');
+$('#bodies').addEventListener('change',e=>{S.bodies=e.target.checked;rebuild()});
+$('#wellsT').addEventListener('change',e=>{S.wells=e.target.checked;wellGroup.visible=S.wells});
+
+$('#runBtn').addEventListener('click',()=>{
+  if(S.run>=0)return;
+  const fwd=S.dir==='fwd';
+  S.source=fwd?'facies':(S.prop==='facies'?'phi':S.prop);
+  S.target=fwd?(S.prop==='facies'?'phi':S.prop):'facies';
+  const btn=$('#runBtn'),sweep=$('#sweep');btn.disabled=true;btn.textContent='Translating…';sweep.hidden=false;
+  const T=reduce?1:4500,t0=performance.now(),L={phi:'porosity',perm:'permeability',facies:'facies'};
+  const step=now=>{const p=Math.min(1,(now-t0)/T);S.run=p;
+    sweep.textContent=`${L[S.source]} → ${L[S.target]} · layer ${Math.max(1,Math.ceil(p*(NK-S.k0)))} of ${NK-S.k0}`;
+    const mins=Math.round(p*112);$('#clkG').textContent=`${Math.floor(mins/60)}:${String(mins%60).padStart(2,'0')} h`;$('#clkC').textContent=`${(p*3).toFixed(1)} days`;
+    recolor();
+    if(p<1)requestAnimationFrame(step);else{S.run=-1;setProp(S.target);btn.disabled=false;btn.textContent='Run GeoPix';setTimeout(()=>{sweep.hidden=true},1500)}};
+  requestAnimationFrame(step);
+});
+
+legend();renderInfo();
+})();
+</script>
