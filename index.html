@@ -534,7 +534,7 @@
         <li><a href="#how">How it works</a></li>
         <li><a href="#demo">Demo</a></li>
         <li><a href="#uses">Applications</a></li>
-        <li><a href="#results">Results</a></li>
+        <li><a href="#research">Research</a></li>
         <li><a href="#team">Team</a></li>
         <li><a href="#contact">Contact</a></li>
       </ul>
@@ -578,7 +578,7 @@
         <div class="lgd"><span><i style="background:#808080"></i>Shale</span><span><i style="background:#F8A808"></i>Shaly sand</span><span><i style="background:#F8F808"></i>Sand</span></div>
         <div class="lgd"><span class="lgd-h" id="evLgH" hidden>Porosity</span><span class="ramp"><b id="evLo">0.04</b><i id="evRamp" style="background:linear-gradient(90deg,#0000A8,#0008F8,#00C8F8,#08F890,#C8F808,#F8D808,#F87808,#C80808)"></i><b id="evHi">0.14 v/v</b></span></div>
       </div>
-      <p class="h2-cap">Drag to compare. Published result, Groningen field · <span id="evPA">0.58</span> <span id="evPAl">pixel accuracy</span></p>
+      <p class="h2-cap">Drag to compare. Published, peer-reviewed result.<span id="evPA" hidden></span><span id="evPAl" hidden></span></p>
     </div>
   </div>
 
@@ -609,15 +609,16 @@
   <section id="how">
     <div class="wrap">
       <h2>How it works</h2>
+      <p class="intro"><b>Pix2Geomodel</b>, our peer-reviewed, patent-pending engine, turns facies into continuous property models, and properties back into facies, from the data you already have.</p>
       <ol class="how">
         <li><span class="n">01</span><b>Learn</b><span>Trains on the intervals you have cored and logged.</span></li>
         <li><span class="n">02</span><b>Translate</b><span>Facies to properties, and properties back to facies.</span></li>
         <li><span class="n">03</span><b>Decide</b><span>Your geologists review and sign off. Hours, not days.</span></li>
       </ol>
       <ul class="gains">
-        <li><b>Faster decisions</b><span>Update a property model the same day.</span></li>
-        <li><b>Less new data</b><span>Start before the next core comes back.</span></li>
-        <li><b>Cheaper uncertainty</b><span>Test a facies scenario in seconds.</span></li>
+        <li><b>Less repetitive modelling</b><span>Property population, automated.</span></li>
+        <li><b>Faster reservoir characterization</b><span>Update a model the same day.</span></li>
+        <li><b>Experts focus on decisions</b><span>Time goes to interpretation.</span></li>
       </ul>
     </div>
   </section>
@@ -633,25 +634,6 @@
         <div class="use"><i style="background:#6B5644"></i><b>Mining</b><span>Geological domains and continuity.</span></div>
         <div class="use"><i style="background:#6A4FB0"></i><b>Digital rocks</b><span>Porous media from rock images.</span></div>
       </div>
-    </div>
-  </section>
-
-  <section id="results">
-    <div class="wrap">
-      <h2>Published benchmarks, not promises</h2>
-      <p class="intro">Groningen field dataset, <i>Geoenergy Science and Engineering</i> (2026).</p>
-      <table>
-        <thead>
-          <tr><th scope="col">Translation task</th><th scope="col">PA</th><th scope="col">mPA</th><th scope="col">mIoU</th><th scope="col">FWIoU</th></tr>
-        </thead>
-        <tbody>
-          <tr><td>Facies → Porosity</td><td class="n">0.58</td><td class="n">0.58</td><td class="n">0.39</td><td class="n">0.41</td></tr>
-          <tr><td>Porosity → Facies</td><td class="n hi">0.94</td><td class="n">0.40</td><td class="n">0.34</td><td class="n hi">0.91</td></tr>
-          <tr><td>Facies → Permeability</td><td class="n">0.70</td><td class="n">0.47</td><td class="n">0.36</td><td class="n">0.56</td></tr>
-          <tr><td>Facies → Water saturation</td><td class="n hi">0.98</td><td class="n">0.33</td><td class="n">0.33</td><td class="n hi">0.97</td></tr>
-        </tbody>
-      </table>
-      <p class="note">PA: pixel accuracy · mPA: mean pixel accuracy · mIoU: mean intersection over union · FWIoU: frequency-weighted IoU.</p>
     </div>
   </section>
 
@@ -776,7 +758,6 @@
 
       <div class="meta">
         <span>Patent application filed, 2025</span>
-        <a href="https://github.com/ARhaman/GeoPix">Open implementation on GitHub</a>
         <span>Dhahran, Saudi Arabia</span>
       </div>
     </div>
@@ -812,12 +793,6 @@
             </a>
             <a href="https://www.linkedin.com/company/geopix-ai/" aria-label="GeoPix AI on LinkedIn" title="LinkedIn">
               <svg viewBox="0 0 24 24"><rect x="2.5" y="2.5" width="19" height="19" rx="3"/><path d="M7 10.5v7M7 7.2v.1M11.5 17.5v-4a2.5 2.5 0 0 1 5 0v4"/></svg>
-            </a>
-            <a href="https://github.com/ARhaman/GeoPix" aria-label="GitHub" title="GitHub">
-              <svg class="solid" viewBox="0 0 24 24"><path d="M12 1.5A10.5 10.5 0 0 0 8.7 22c.52.1.71-.23.71-.5v-1.9c-2.9.63-3.52-1.4-3.52-1.4-.48-1.21-1.16-1.53-1.16-1.53-.95-.65.07-.64.07-.64 1.05.08 1.6 1.08 1.6 1.08.94 1.6 2.46 1.14 3.06.87.1-.68.37-1.14.66-1.4-2.31-.27-4.74-1.16-4.74-5.15 0-1.14.4-2.07 1.07-2.8-.11-.26-.47-1.32.1-2.76 0 0 .87-.28 2.86 1.07a9.9 9.9 0 0 1 5.2 0c1.99-1.35 2.86-1.07 2.86-1.07.57 1.44.21 2.5.1 2.76.67.73 1.07 1.66 1.07 2.8 0 4-2.43 4.88-4.75 5.14.38.33.71.97.71 1.95v2.9c0 .28.19.61.72.5A10.5 10.5 0 0 0 12 1.5z"/></svg>
-            </a>
-            <a href="https://scholar.google.com/citations?user=39TVhfcAAAAJ&amp;hl=en" aria-label="Google Scholar" title="Google Scholar">
-              <svg viewBox="0 0 24 24"><path d="M12 3.2 1.8 9 12 14.8 22.2 9z"/><path d="M5.6 11.2v4.4c0 1.9 2.9 3.4 6.4 3.4s6.4-1.5 6.4-3.4v-4.4"/></svg>
             </a>
           </div>
         </div>

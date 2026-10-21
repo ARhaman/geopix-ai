@@ -398,12 +398,7 @@ function renderFull(){
           <p class="note">One slice of the Groningen field model. ${S.evMode==='facies'?'Drag the handle: the facies on the left is the only input, and the property on the right is what GeoPix generated from it.':'Drag the handle to compare GeoPix output with the reference property on the same slice.'} Figures from Al-Fakih et al. (2026).</p>
         </div>
         <div class="ev-tab">
-          <div style="overflow-x:auto"><table class="mt"><thead><tr><th>Task</th><th>PA</th><th>mPA</th><th>mIoU</th><th>FWIoU</th></tr></thead><tbody>
-            <tr><td>Facies → Porosity</td><td>0.58</td><td>0.58</td><td>0.39</td><td>0.41</td></tr>
-            <tr><td>Porosity → Facies</td><td>0.94</td><td>0.40</td><td>0.34</td><td>0.91</td></tr>
-            <tr><td>Facies → Permeability</td><td>0.70</td><td>0.47</td><td>0.36</td><td>0.56</td></tr>
-            <tr><td>Facies → Sw</td><td>0.98</td><td>0.33</td><td>0.33</td><td>0.97</td></tr></tbody></table></div>
-          <p class="note">PA pixel accuracy; mPA mean pixel accuracy; mIoU mean intersection over union; FWIoU frequency-weighted IoU. High PA with lower mPA means common classes are predicted better than rare ones. Facies → Porosity is the most balanced task and the hardest.</p>
+          <p class="note" style="font-size:16px">Peer-reviewed in <i>Geoenergy Science and Engineering</i> (2026) on the Groningen field dataset. Full method and evaluation in the paper: doi.org/10.1016/j.geoen.2025.214342.</p>
         </div>
       </div>
       <div><span class="eyebrow">Evidence ledger</span>
