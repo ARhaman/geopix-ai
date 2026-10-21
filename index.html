@@ -356,7 +356,7 @@
   <section class="glance" aria-label="GeoPix AI at a glance">
     <div class="wrap">
       <div class="gl reveal">
-        <div><svg class="ic"><use href="#i-clock"/></svg><b>&lt; 2 h</b><span>per property model</span></div>
+        <div><svg class="ic"><use href="#i-clock"/></svg><b>&lt; 2 h</b><span>per property model, vs 2–5 days today</span></div>
         <div><svg class="ic"><use href="#i-book"/></svg><b>Peer-reviewed</b><span><a href="https://doi.org/10.1016/j.geoen.2025.214342" target="_blank" rel="noopener">Geoenergy Sci. &amp; Eng., 2026</a></span></div>
         <div><svg class="ic"><use href="#i-shield"/></svg><b>Patent pending</b><span>US application filed</span></div>
         <div><svg class="ic"><use href="#i-rocket"/></svg><b>DTV</b><span>Deep-Tech Ventures</span></div>
@@ -623,8 +623,8 @@
           <div><svg class="ic"><use href="#i-pin"/></svg>Dhahran Techno Valley, Saudi Arabia</div>
         </div>
       </div>
-      <!-- Formspree: replace REPLACE_WITH_YOUR_FORM_ID with your form ID. Until then the form opens the visitor's email app. -->
-      <form class="form reveal" id="cform" action="https://formspree.io/f/REPLACE_WITH_YOUR_FORM_ID" method="POST">
+      <!-- Messages are delivered by FormSubmit (formsubmit.co) to the inbox below. The first message triggers a one-time activation email. -->
+      <form class="form reveal" id="cform" action="https://formsubmit.co/ajax/abdulrahman.alfakih@geopix-ai.com" method="POST">
         <h3>Send us a message</h3>
         <fieldset>
           <legend>I'm interested in</legend>
@@ -638,7 +638,7 @@
         <label class="f">Full name<input type="text" name="name" placeholder="Your name" required autocomplete="name"></label>
         <label class="f">Work email<input type="email" name="email" placeholder="name@company.com" required autocomplete="email"></label>
         <label class="f">Your project<textarea name="message" placeholder="Field, data you have, what you want to decide…" required></textarea></label>
-        <input type="hidden" name="_subject" value="GeoPix AI website inquiry">
+        <input type="hidden" name="_subject" value="GeoPix AI website inquiry"><input type="hidden" name="_template" value="table"><input type="text" name="_honey" style="display:none" tabindex="-1" autocomplete="off">
         <button type="submit">Send Inquiry →</button>
         <p class="msg" id="fmsg" aria-live="polite">We reply within two working days.</p>
       </form>
@@ -734,10 +734,11 @@
   /* contact form */
   var form=$('#cform'),msg=$('#fmsg');
   form.addEventListener('submit',function(e){e.preventDefault();var d=new FormData(form);
-    if(form.action.indexOf('REPLACE_WITH')>-1){var body='Name: '+d.get('name')+'\nEmail: '+d.get('email')+'\nInterest: '+d.get('interest')+'\n\n'+d.get('message');
-      location.href='mailto:contact@geopix-ai.com?subject='+encodeURIComponent('GeoPix AI inquiry: '+d.get('interest'))+'&body='+encodeURIComponent(body);return}
+    var mailto=function(){var body='Name: '+d.get('name')+'\nEmail: '+d.get('email')+'\nInterest: '+d.get('interest')+'\n\n'+d.get('message');
+      location.href='mailto:contact@geopix-ai.com?subject='+encodeURIComponent('GeoPix AI inquiry: '+d.get('interest'))+'&body='+encodeURIComponent(body)};
     msg.textContent='Sending…';
-    fetch(form.action,{method:'POST',body:d,headers:{Accept:'application/json'}}).then(function(r){if(r.ok){form.reset();msg.textContent='Thank you. We will be in touch within two working days.'}else msg.textContent='Something went wrong. Please email contact@geopix-ai.com.'}).catch(function(){msg.textContent='Something went wrong. Please email contact@geopix-ai.com.'});
+    fetch(form.action,{method:'POST',body:d,headers:{Accept:'application/json'}}).then(function(r){return r.json().catch(function(){return {}}).then(function(j){
+      if(r.ok&&String(j.success)!=='false'){form.reset();msg.textContent='Thank you. We will be in touch within two working days.'}else{msg.textContent='Opening your email app instead…';mailto()}})}).catch(function(){msg.textContent='Opening your email app instead…';mailto()});
   });
 })();
 </script>
