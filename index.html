@@ -13,7 +13,8 @@
 <meta property="og:image" content="https://geopix-ai.com/assets/og-card.png">
 <meta name="twitter:card" content="summary_large_image">
 
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230A1628'/><rect x='6' y='7' width='7' height='5' fill='%23E8A33D'/><rect x='6' y='13' width='7' height='5' fill='%23E8A33D' opacity='.55'/><rect x='6' y='19' width='7' height='6' fill='%23E8A33D' opacity='.8'/><rect x='17' y='7' width='9' height='5' fill='%234FC4B8'/><rect x='17' y='13' width='9' height='5' fill='%233C8FC0'/><rect x='17' y='19' width='9' height='6' fill='%232E5E9E'/></svg>">
+<link rel="icon" type="image/png" href="assets/favicon.png">
+<link rel="apple-touch-icon" href="assets/logo-mark.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -72,7 +73,7 @@
   header{position:sticky;top:0;z-index:40;background:rgba(243,244,247,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--rule-soft)}
   .nav{display:flex;align-items:center;justify-content:space-between;gap:24px;padding:15px 0}
   .brand{display:flex;align-items:center;gap:11px;font-family:var(--display);font-weight:700;font-size:18.5px;letter-spacing:-.015em}
-  .brand svg{display:block;border-radius:8px;flex:none}
+  .brand{text-decoration:none;color:inherit}.brand img{display:block;border-radius:9px;flex:none}.brand em{font-style:normal;color:var(--facies-ink)}
   nav ul{display:flex;gap:26px;list-style:none;margin:0;padding:0;font-family:var(--display);font-size:14.5px;font-weight:500}
   nav a{text-decoration:none;color:var(--text-dim);padding-bottom:3px;border-bottom:1.5px solid transparent;transition:color .15s,border-color .15s}
   nav a:hover,nav a:focus-visible{color:var(--text);border-bottom-color:var(--facies)}
@@ -236,6 +237,48 @@
   .js .rv{opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s cubic-bezier(.2,.8,.3,1)}
   .js .rv.in{opacity:1;transform:none}
 
+  /* dark hero band with the logo */
+  .hero-band{background:#0B1322;color:#F3F4F7;position:relative;overflow:hidden}
+  .hero-band::before{content:"";position:absolute;inset:0;background:
+    radial-gradient(60% 80% at 85% 20%,rgba(31,122,114,.22),transparent 70%),
+    radial-gradient(50% 70% at 10% 90%,rgba(232,163,61,.12),transparent 70%);pointer-events:none}
+  .hero-band .hero{position:relative;padding:64px 0 46px}
+  .hero-band .hero-top{grid-template-columns:minmax(0,1fr) 300px;align-items:center;gap:56px}
+  .hero-copy{display:flex;flex-direction:column;gap:22px}
+  .hero-band h1{color:#FFFFFF}
+  .hero-band .lede{color:#C9D1DD}
+  .hero-band .lede b{color:#FFFFFF}
+  .hero-mark{width:300px;height:300px;border-radius:44px;box-shadow:0 30px 80px rgba(0,0,0,.45);transform:rotate(-3deg);transition:transform .5s cubic-bezier(.2,.8,.3,1)}
+  .hero-mark:hover{transform:rotate(0) scale(1.02)}
+  .hero-band .translate{border-color:rgba(255,255,255,.14)}
+  .hero-band .tcell + .tcell{border-left-color:rgba(255,255,255,.08)}
+  .hero-band .tlabel{color:#9AA6BA}
+  .hero-band .tlabel span{color:#F0B85C}
+  .hero-band .tlabel.p span{color:#5FD3C5}
+  .hero-band .tarrow{color:#9AA6BA}
+  .hero-band .btn-b{background:transparent;color:#F3F4F7;border-color:rgba(255,255,255,.3)}
+  .hero-band .btn-b:hover{background:rgba(255,255,255,.08)}
+  .hero-band .proofbar{border-top-color:rgba(255,255,255,.12);color:#C9D1DD}
+
+  /* applications */
+  .uses{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:34px 0 0}
+  .use{background:var(--bg-2);border:1px solid var(--rule-soft);border-radius:10px;padding:20px 18px;display:flex;flex-direction:column;gap:8px;transition:transform .2s,box-shadow .2s,border-color .2s}
+  .use:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(14,22,40,.08);border-color:var(--rule)}
+  .use i{width:12px;height:12px;border-radius:50%}
+  .use b{font-family:var(--display);font-size:18px;font-weight:700;letter-spacing:-.01em}
+  .use span{color:var(--text-dim);font-size:16px;line-height:1.5}
+
+  /* team: core three + advisory board */
+  #team .team{grid-template-columns:repeat(3,minmax(0,1fr));gap:40px 36px}
+  #team .member{grid-template-columns:1fr;gap:14px;align-content:start}
+  .adv-h{font-family:var(--display);font-size:22px;font-weight:700;letter-spacing:-.015em;margin:56px 0 6px;padding-top:30px;border-top:1px solid var(--rule-soft)}
+  .adv-sub{color:var(--text-dim);font-size:16.5px;margin:0;max-width:66ch}
+  .advisors{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:26px;margin:28px 0 0}
+  .adv{background:var(--bg);border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:4px}
+  .adv img{width:84px;height:84px;border-radius:50%;object-fit:cover;margin-bottom:12px}
+  .adv h3{font-family:var(--display);font-size:18px;font-weight:700;margin:0;letter-spacing:-.01em}
+  .adv p{margin:6px 0 0;font-size:16px;color:var(--text-dim);line-height:1.5}
+
   /* quick contact */
   .qc{position:fixed;right:22px;bottom:22px;z-index:60;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
   .qc-menu{display:flex;flex-direction:column;align-items:flex-end;gap:9px}
@@ -392,6 +435,7 @@
   .cform button:hover{background:#f0b254;transform:translateY(-1px)}
   .fnote{margin:0;font-size:14.5px;color:var(--text-dim)}
 
+  .foot{display:flex;align-items:center;gap:14px}.foot img{border-radius:9px}
   footer{padding:40px 0 64px;border-top:1px solid var(--rule-soft);color:var(--text-dim);font-size:15.5px;background:var(--bg-2)}
 
   :focus-visible{outline:2.5px solid var(--facies);outline-offset:3px;border-radius:2px}
@@ -406,6 +450,10 @@
     .team{grid-template-columns:1fr}
     .steps{grid-template-columns:1fr;gap:26px}
     .contact-grid{grid-template-columns:1fr;gap:40px}
+    .hero-band .hero-top{grid-template-columns:1fr}
+    .hero-mark{width:180px;height:180px;border-radius:28px;order:-1}
+    .uses{grid-template-columns:repeat(2,minmax(0,1fr))}
+    #team .team,.advisors{grid-template-columns:1fr}
     .ev-grid{grid-template-columns:1fr;gap:26px}
     .vm{grid-template-columns:1fr}
     .vals{grid-template-columns:1fr;gap:20px}
@@ -444,18 +492,10 @@
 <header>
   <div class="sprog" id="sprog" aria-hidden="true"></div>
   <div class="wrap nav">
-    <div class="brand">
-      <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
-        <rect width="32" height="32" rx="8" fill="#102140"/>
-        <rect x="6" y="7" width="7" height="5" fill="#E8A33D"/>
-        <rect x="6" y="13" width="7" height="5" fill="#E8A33D" opacity=".55"/>
-        <rect x="6" y="19" width="7" height="6" fill="#E8A33D" opacity=".8"/>
-        <rect x="17" y="7" width="9" height="5" fill="#4FC4B8"/>
-        <rect x="17" y="13" width="9" height="5" fill="#3C8FC0"/>
-        <rect x="17" y="19" width="9" height="6" fill="#2E5E9E"/>
-      </svg>
-      GeoPix AI
-    </div>
+    <a class="brand" href="#" aria-label="GeoPix AI home">
+      <img src="assets/logo-mark.png" alt="" width="38" height="38">
+      <span>GeoPix <em>AI</em></span>
+    </a>
     <nav>
       <ul>
         <li><a href="#method">Method</a></li>
@@ -472,14 +512,18 @@
 
 <main>
 
+  <div class="hero-band">
   <div class="wrap hero">
     <div class="hero-top">
+      <div class="hero-copy">
       <h1>Reservoir property models in hours, not days.</h1>
       <p class="lede">
         GeoPix learns how geological facies relate to petrophysical properties, then generates porosity,
         permeability and water saturation maps directly from a facies model. In validation with a national
         oil company, <b>static modeling went from two to five days down to under two hours.</b>
       </p>
+      </div>
+      <img class="hero-mark" src="assets/logo-mark-hero.png" alt="GeoPix AI mark: an object-based channel and an SIS facies model, each translated into a property model" width="512" height="512">
     </div>
 
     <div class="translate">
@@ -508,6 +552,7 @@
       <span>Patent filed</span>
       <span>Deep-Tech Ventures Program, Dhahran Techno Valley</span>
     </div>
+  </div>
   </div>
 
   <section id="demo" class="band">
@@ -626,6 +671,21 @@
             <p class="ev-note">One slice of the Groningen field model, from Al-Fakih et al. (2026), <i>Geoenergy Science and Engineering</i>.</p>
           </div>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="uses">
+    <div class="wrap">
+      <h2>One engine for every subsurface model</h2>
+      <p class="intro">Wherever a property model has to be built from sparse data, the same facies-to-property engine applies. Validated on reservoir datasets; each new domain starts with a benchmark on the customer's own data.</p>
+      <div class="uses">
+        <div class="use"><i style="background:#E8A33D"></i><b>Oil &amp; gas</b><span>Reservoir characterization, uncored intervals and field development.</span></div>
+        <div class="use"><i style="background:#C25A3E"></i><b>Geothermal</b><span>Resource assessment and permeability models for well placement.</span></div>
+        <div class="use"><i style="background:#1F7A72"></i><b>Carbon &amp; energy storage</b><span>Capacity and injectivity for CO₂, hydrogen and gas storage.</span></div>
+        <div class="use"><i style="background:#2E6FA8"></i><b>Groundwater</b><span>Aquifer characterization and subsurface planning.</span></div>
+        <div class="use"><i style="background:#6B5644"></i><b>Mining</b><span>Geological domains and resource continuity.</span></div>
+        <div class="use"><i style="background:#6A4FB0"></i><b>Digital rocks</b><span>Porous-media properties from rock images.</span></div>
       </div>
     </div>
   </section>
@@ -786,13 +846,28 @@
           </div>
         </div>
 
-        <div class="member">
-          <img src="assets/team-kaka.png" alt="" width="104" height="104" loading="lazy">
-          <div>
-            <h3>SanLinn I. Kaka</h3>
-            <div class="role">Scientific Advisor</div>
-            <p>Associate Professor at KFUPM, PhD Carleton. Twenty years in reservoir characterization and monitoring, microseismic analysis, and AI applications in geophysics.</p>
-          </div>
+      </div>
+
+      <h3 class="adv-h">Advisory board</h3>
+      <p class="adv-sub">Senior researchers who guide our science and direction. They advise GeoPix AI externally and are not part of the operating team.</p>
+      <div class="advisors">
+        <div class="adv">
+          <img src="assets/team-kaka.png" alt="" width="84" height="84" loading="lazy">
+          <h3>SanLinn I. Kaka</h3>
+          <div class="role">Scientific Advisor</div>
+          <p>Associate Professor at KFUPM, PhD Carleton. Twenty years in reservoir characterization and monitoring, microseismic analysis, and AI in geophysics.</p>
+        </div>
+        <div class="adv">
+          <img src="assets/team-hanafy.png" alt="" width="84" height="84" loading="lazy">
+          <h3>Sherif M. Hanafy</h3>
+          <div class="role">Advisor, Geophysics &amp; Seismic AI</div>
+          <p>Associate Professor and Geophysics Program Leader at KFUPM. Previously a senior research scientist at KAUST, where he founded the Seismology Lab. Works on seismic imaging and machine learning for seismic and GPR data.</p>
+        </div>
+        <div class="adv">
+          <img src="assets/team-amin.png" alt="" width="84" height="84" loading="lazy">
+          <h3>Amin Al Fakih</h3>
+          <div class="role">Advisor, Porous Materials &amp; Carbon Storage</div>
+          <p>Assistant Professor of Civil and Environmental Engineering at KFUPM and research scholar at its centre for construction and building materials. Over 100 publications on concrete, geopolymers and CO₂ in cementitious materials.</p>
         </div>
       </div>
 
@@ -921,7 +996,7 @@
 </main>
 
 <footer>
-  <div class="wrap">GeoPix AI — generative models for reservoir geomodeling. Dhahran, Saudi Arabia.</div>
+  <div class="wrap foot"><img src="assets/logo-mark.png" alt="" width="40" height="40"><span>GeoPix AI — generative models for subsurface property modeling. Dhahran, Saudi Arabia.</span></div>
 </footer>
 
 
@@ -1028,7 +1103,7 @@
   // reveal on scroll
   if ('IntersectionObserver' in window && !reduce) {
     document.documentElement.classList.add('js');
-    var targets = document.querySelectorAll('main h2, .intro, .translate, .trio > div, table, .cmp-wrap, .vid, .steps li, .status li, .vm-item, .vals li, .member, .time li, .refs li, .contact-grid > *');
+    var targets = document.querySelectorAll('main h2, .intro, .translate, .trio > div, table, .cmp-wrap, .vid, .steps li, .status li, .vm-item, .vals li, .member, .use, .adv, .time li, .refs li, .contact-grid > *');
     var ro = new IntersectionObserver(function (es) {
       es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } });
     }, {rootMargin: '0px 0px -8% 0px'});
