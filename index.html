@@ -137,6 +137,17 @@
   .legend{display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:13.5px;color:var(--dim);min-height:22px}
   .legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
   .legend .ramp{display:inline-block;width:130px;height:10px;border-radius:3px;margin:0 8px;vertical-align:-1px}
+  .ex{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+  .ex button{position:relative;aspect-ratio:1/1;padding:6px;border:2px solid var(--rule);border-radius:14px;background:#F3F4F7;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s}
+  .ex button:hover{transform:translateY(-2px)}
+  .ex button[aria-pressed="true"]{border-color:var(--amber);box-shadow:0 8px 24px rgba(232,163,61,.28)}
+  .ex img{width:100%;height:100%;object-fit:contain}
+  .ex b{position:absolute;top:6px;left:6px;font-size:12px;background:var(--ink);color:#fff;border-radius:999px;min-width:22px;height:22px;display:grid;place-items:center}
+  .pick .legend{margin-top:10px}
+  .down{display:flex;flex-direction:column;align-items:center;gap:2px;margin:10px 0 6px;color:var(--amber-ink);font-weight:600;font-size:14px;letter-spacing:.04em}
+  .down svg{width:26px;height:64px;stroke:var(--amber);stroke-width:2.4;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .out{max-width:640px;margin:0 auto}
+  @media (max-width:560px){.ex{gap:6px}.ex button{padding:3px;border-radius:10px}.ex b{font-size:10px;min-width:18px;height:18px}}
   .strip{display:flex;gap:8px;overflow-x:auto;margin-top:18px;padding-bottom:6px}
   .strip button{flex:none;width:68px;height:68px;padding:0;border:2px solid transparent;border-radius:10px;background:#F3F4F7;cursor:pointer;overflow:hidden}
   .strip button[aria-current="true"]{border-color:var(--amber)}
@@ -351,25 +362,26 @@
           <label><input type="radio" name="prop" value="sw"> Water Saturation</label>
         </div>
         <p class="pair" id="pair"></p>
-        <div class="viewer">
-          <div class="vcol">
-            <div class="vlab"><span id="labIn">Input</span><span id="sliceNo"></span></div>
-            <div class="frame"><img id="dIn" alt=""></div>
-            <div class="legend" id="lgIn"></div>
-          </div>
-          <div class="vcol">
-            <div class="vlab"><span id="labOut">GeoPix output vs reference</span><span>drag ⇆</span></div>
-            <div class="frame cmp" id="cmp">
-              <img id="dRef" alt="">
-              <img id="dOut" class="top" alt="">
-              <span class="tag l">Reference</span><span class="tag r">GeoPix</span>
-              <div class="bar"></div>
-              <input type="range" min="0" max="100" value="50" id="cmpR" aria-label="Compare GeoPix output with reference">
-            </div>
-            <div class="legend" id="lgOut"></div>
-          </div>
+        <div class="pick">
+          <div class="vlab"><span id="labIn">Input · facies</span><span>Choose an example</span></div>
+          <div class="ex" id="strip" role="group" aria-label="Example inputs"></div>
+          <div class="legend" id="lgIn"></div>
         </div>
-        <div class="strip" id="strip" aria-label="Test slices"></div>
+        <div class="down" aria-hidden="true">
+          <svg viewBox="0 0 24 64"><path d="M12 2v56M4 50l8 10 8-10"/></svg>
+          <span>Pix2Geomodel</span>
+        </div>
+        <div class="vcol out">
+          <div class="vlab"><span id="labOut">GeoPix output vs reference</span><span>drag ⇆</span></div>
+          <div class="frame cmp" id="cmp">
+            <img id="dRef" alt="">
+            <img id="dOut" class="top" alt="">
+            <span class="tag l">Reference</span><span class="tag r">GeoPix</span>
+            <div class="bar"></div>
+            <input type="range" min="0" max="100" value="50" id="cmpR" aria-label="Compare GeoPix output with reference">
+          </div>
+          <div class="legend" id="lgOut"></div>
+        </div>
         <p class="fine">Held-out test slices from the public Groningen field model. Outputs are real Pix2Geomodel predictions (Al-Fakih et al., 2026).</p>
       </div>
 
@@ -553,32 +565,30 @@
     var r=document.querySelector('input[name=interest][value="'+a.dataset.interest+'"]');if(r)r.checked=true;})});
 
   /* interactive demo: real Pix2Geomodel test results */
-  var N=12,FAC='<span><i style="background:#F8F808"></i>Sand</span><span><i style="background:#F8A808"></i>Shaly sand</span><span><i style="background:#808080"></i>Shale</span>';
+  var PICK=[10,11,2,7,9],FAC='<span><i style="background:#F8F808"></i>Sand</span><span><i style="background:#F8A808"></i>Shaly sand</span><span><i style="background:#808080"></i>Shale</span>';
   var JET='linear-gradient(90deg,#0000A8,#0008F8,#00C8F8,#08F890,#C8F808,#F8D808,#F87808,#C80808)';
   var PROP={phi:'Porosity',k:'Permeability',sw:'Water Saturation'};
   var SETS={fwd:{phi:'fphi',k:'fk',sw:'fsw'},inv:{phi:'phif'}};
-  var st={dir:'fwd',prop:'phi',n:1};
+  var st={dir:'fwd',prop:'phi',n:0};
   var ramp=function(p){return '<span>'+PROP[p]+'</span><span>Low<i class="ramp" style="background:'+JET+'"></i>High</span>'};
   var strip=$('#strip');
   function render(){
-    var set=SETS[st.dir][st.prop],path='assets/demo/'+set+'/'+(st.n<10?'0':'')+st.n;
+    var set=SETS[st.dir][st.prop],sl=PICK[st.n],path='assets/demo/'+set+'/'+(sl<10?'0':'')+sl;
     var fwd=st.dir==='fwd',P=PROP[st.prop];
     $('#pair').innerHTML=fwd?'Geological Facies<i>→</i>'+P:P+'<i>→</i>Geological Facies';
     $('#labIn').textContent='Input · '+(fwd?'facies':P.toLowerCase());
-    $('#sliceNo').textContent='Slice '+st.n+' / '+N;
-    $('#dIn').src=path+'i.jpg';$('#dIn').alt='Input '+(fwd?'facies':P.toLowerCase())+' map';
     $('#dOut').src=path+'p.jpg';$('#dOut').alt='GeoPix predicted '+(fwd?P.toLowerCase():'facies')+' map';
     $('#dRef').src=path+'g.jpg';$('#dRef').alt='Reference '+(fwd?P.toLowerCase():'facies')+' map';
     $('#lgIn').innerHTML=fwd?FAC:ramp(st.prop);$('#lgOut').innerHTML=fwd?ramp(st.prop):FAC;
     strip.innerHTML='';
-    for(var i=1;i<=N;i++){(function(i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Test slice '+i);b.setAttribute('aria-current',String(i===st.n));
-      b.innerHTML='<img src="assets/demo/'+set+'/'+(i<10?'0':'')+i+'i.jpg" alt="" loading="lazy">';b.onclick=function(){st.n=i;render()};strip.appendChild(b)})(i)}
+    PICK.forEach(function(sn,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Example '+(i+1));b.setAttribute('aria-pressed',String(i===st.n));
+      b.innerHTML='<b>'+(i+1)+'</b><img src="assets/demo/'+set+'/'+(sn<10?'0':'')+sn+'i.jpg" alt="Input '+(fwd?'facies':P.toLowerCase())+' map, example '+(i+1)+'">';b.onclick=function(){st.n=i;render()};strip.appendChild(b)});
     document.querySelectorAll('.dir button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.dir===st.dir))});
     document.querySelectorAll('.props label').forEach(function(l){var inp=l.querySelector('input'),ok=!!SETS[st.dir][inp.value];
       inp.disabled=!ok;l.classList.toggle('off',!ok);l.title=ok?'':'Demonstration coming soon';inp.checked=inp.value===st.prop});
   }
-  $('.dir').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;st.dir=b.dataset.dir;if(!SETS[st.dir][st.prop])st.prop='phi';st.n=1;render()});
-  document.querySelectorAll('input[name=prop]').forEach(function(r){r.addEventListener('change',function(){st.prop=r.value;st.n=1;render()})});
+  $('.dir').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;st.dir=b.dataset.dir;if(!SETS[st.dir][st.prop])st.prop='phi';st.n=0;render()});
+  document.querySelectorAll('input[name=prop]').forEach(function(r){r.addEventListener('change',function(){st.prop=r.value;st.n=0;render()})});
   var cmp=$('#cmp'),cr=$('#cmpR');cr.addEventListener('input',function(){cmp.style.setProperty('--pos',cr.value+'%')});
   render();
 
