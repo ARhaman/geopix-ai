@@ -3,26 +3,26 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: full-window 3D viewport of the real Groningen model; controls float left, info panel right. One dark visual world by design. */
+/* Layout: full-window 3D viewport of the real Groningen model; controls float left, info panel right. Light theme to match geopix-ai.com. */
 :root{
-  --bg:#070C16; --panel:rgba(13,20,34,.9); --panel-2:rgba(255,255,255,.05); --line:rgba(255,255,255,.10);
-  --ink:#E8EDF5; --dim:#93A0B5; --amber:#E8A33D; --teal:#3FB0A4; --slow:#E07A62;
+  --bg:#EEF1F6; --panel:rgba(255,255,255,.93); --panel-2:#F3F5F9; --line:rgba(14,22,40,.11);
+  --ink:#0E1628; --dim:#55637A; --amber:#E8A33D; --amber-ink:#8F5B08; --teal:#1F7A72; --slow:#C25A3E;
   --display:"Archivo",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,monospace;
-  color-scheme:dark;
+  color-scheme:light;
 }
 *{box-sizing:border-box}
 html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--display);overflow:hidden}
+body{margin:0;background:radial-gradient(ellipse 80% 70% at 50% 45%,#FFFFFF 0%,#EEF1F6 55%,#DDE3EC 100%) fixed;color:var(--ink);font-family:var(--display);overflow:hidden}
 #scene{position:fixed;inset:0}
 #scene canvas{display:block}
-.topbar{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));background:linear-gradient(180deg,rgba(7,12,22,.95),rgba(7,12,22,0))}
+.topbar{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));background:linear-gradient(180deg,rgba(238,241,246,.96),rgba(238,241,246,0))}
 .brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:17px;letter-spacing:-.01em}
 .brand b{color:var(--amber);font-weight:800}
 .brand small{font-weight:600;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin-left:6px}
 .tabs{display:flex;gap:4px;background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:4px}
 .tabs button{font:600 13px var(--display);color:var(--dim);background:none;border:0;border-radius:999px;padding:7px 14px;cursor:pointer}
-.tabs button[aria-selected="true"]{background:var(--ink);color:#0B1322}
-.rail,.info{position:fixed;z-index:4;background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:14px}
+.tabs button[aria-selected="true"]{background:var(--ink);color:#fff}
+.rail,.info{position:fixed;z-index:4;background:var(--panel);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(14,22,40,.08)}
 .rail{left:max(16px,env(safe-area-inset-left,0px));top:70px;width:270px;padding:16px;display:flex;flex-direction:column;gap:16px;max-height:calc(100% - 90px);overflow:auto}
 .info{right:max(16px,env(safe-area-inset-right,0px));top:70px;width:340px;padding:18px;max-height:calc(100% - 90px);overflow:auto;display:flex;flex-direction:column;gap:14px}
 .lab{font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--dim)}
@@ -30,7 +30,7 @@ body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--display);o
 .seg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
 .seg.two{grid-template-columns:1fr 1fr}
 .seg button,.chip{font:600 12.5px var(--display);color:var(--ink);background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:8px 4px;cursor:pointer}
-.seg button[aria-pressed="true"]{background:rgba(232,163,61,.18);border-color:var(--amber);color:#F6C77A}
+.seg button[aria-pressed="true"]{background:rgba(232,163,61,.16);border-color:var(--amber);color:var(--amber-ink)}
 .run{font:800 15px var(--display);background:var(--amber);color:#1A1205;border:0;border-radius:10px;padding:12px;cursor:pointer}
 .run:disabled{opacity:.6;cursor:default}
 .clock{display:grid;grid-template-columns:1fr 1fr;gap:6px}
@@ -48,20 +48,22 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 .legend{position:fixed;z-index:4;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:8px 16px;display:flex;align-items:center;gap:14px;font-size:12.5px;color:var(--dim);white-space:nowrap}
 .legend .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px}
 .legend .ramp{display:inline-block;width:150px;height:10px;border-radius:2px;vertical-align:-1px;margin:0 8px}
-.tag{font:600 11px var(--display);letter-spacing:.08em;text-transform:uppercase;color:#F6C77A}
+.tag{font:600 11px var(--display);letter-spacing:.08em;text-transform:uppercase;color:var(--amber-ink)}
 .info h2{margin:0;font-size:21px;line-height:1.2;letter-spacing:-.01em}
-.info p{margin:0;font-size:14px;line-height:1.55;color:#C6CFDC}
-.info ol,.info ul{margin:0;padding-left:18px;font-size:14px;line-height:1.55;color:#C6CFDC;display:flex;flex-direction:column;gap:6px}
+.info p{margin:0;font-size:14px;line-height:1.55;color:#3A475C}
+.info ol,.info ul{margin:0;padding-left:18px;font-size:14px;line-height:1.55;color:#3A475C;display:flex;flex-direction:column;gap:6px}
 .kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 .kv div{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:10px}
 .kv span{display:block;font-size:11px;color:var(--dim);letter-spacing:.06em;text-transform:uppercase}
 .kv b{font:500 19px var(--mono)}
-.field{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:13px;color:#C6CFDC}
+.field{display:grid;grid-template-columns:1fr 88px;gap:8px;align-items:center;font-size:13px;color:#3A475C}
 .field input{font:500 14px var(--mono);background:var(--panel-2);border:1px solid var(--line);border-radius:6px;color:var(--ink);padding:6px 8px;width:100%}
 .note{font-size:12px!important;color:var(--dim)!important}
 .cta{display:block;text-align:center;text-decoration:none;font:800 14px var(--display);background:var(--amber);color:#1A1205;border-radius:10px;padding:11px}
-.welllabel{position:fixed;z-index:3;pointer-events:none;font:700 11px var(--display);color:#fff;background:rgba(11,19,34,.85);border:1px solid var(--line);border-radius:4px;padding:2px 6px;transform:translate(-50%,-140%)}
-#logs canvas{width:100%;height:300px;display:block;background:rgba(0,0,0,.25);border-radius:8px}
+.welllabel{position:fixed;z-index:3;pointer-events:none;font:700 11px var(--display);color:#fff;background:#0E1628;border:1px solid #0E1628;border-radius:4px;padding:2px 6px;transform:translate(-50%,-140%)}
+#logs canvas,#bars{width:100%;display:block;background:var(--panel-2);border-radius:8px}#logs canvas{height:300px}
+.badges{display:flex;gap:6px;flex-wrap:wrap}.badges span{font:600 11.5px var(--display);color:var(--ink);background:var(--panel-2);border:1px solid var(--line);border-radius:999px;padding:5px 10px}
+.kv.big b{font-size:22px}
 .hint{font-size:12px;color:var(--dim);margin:0}
 .sweep{position:fixed;z-index:4;left:50%;top:76px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:12.5px;color:var(--dim)}
 .loading{position:fixed;inset:0;display:grid;place-items:center;z-index:6;font-size:15px;color:var(--dim);background:var(--bg)}
@@ -82,7 +84,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
   <div class="brand">GeoPix <b>AI</b> <small>Reservoir Lab</small></div>
   <div class="tabs" role="tablist" aria-label="Panels">
     <button role="tab" aria-selected="true" data-tab="explore">Explore</button>
-    <button role="tab" aria-selected="false" data-tab="tech">Technical</button>
+    <button role="tab" aria-selected="false" data-tab="tech">Results</button>
     <button role="tab" aria-selected="false" data-tab="biz">Business</button>
   </div>
 </div>
@@ -167,15 +169,15 @@ function cellColor(q,k){
 
 /* ---------------- scene ---------------- */
 const host=document.getElementById('scene');
-const renderer=new THREE.WebGLRenderer({antialias:true});
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setClearColor(0x000000,0);
 renderer.setPixelRatio(Math.min(2,devicePixelRatio||1));host.appendChild(renderer.domElement);
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x070C16);
+const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(36,1,0.5,3000);camera.position.set(-120,150,230);
 const controls=new THREE.OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.maxPolarAngle=Math.PI*.49;
 const setTarget=()=>controls.target.set(NI/2,NK*S.ve/2,NJ/2);setTarget();
-scene.add(new THREE.HemisphereLight(0xe6ecff,0x1a1f2a,.95));
+scene.add(new THREE.HemisphereLight(0xffffff,0x5a6474,.95));
 const sun=new THREE.DirectionalLight(0xffffff,.55);sun.position.set(-80,200,120);scene.add(sun);
-const grid=new THREE.GridHelper(420,28,0x223047,0x141d2e);grid.position.set(NI/2,-.1,NJ/2);scene.add(grid);
+const grid=new THREE.GridHelper(420,28,0xC3CBD7,0xD6DCE5);grid.position.set(NI/2,-.1,NJ/2);scene.add(grid);
 
 let mesh=null,cap=0,shown=null;
 const geo=new THREE.BoxGeometry(1,1,1),mat=new THREE.MeshLambertMaterial();
@@ -209,7 +211,7 @@ function recolor(){
 const WELLS=[{n:'W-1',i:110,j:32},{n:'W-2',i:71,j:58},{n:'W-3',i:102,j:91},{n:'W-4',i:47,j:39}];
 const wellGroup=new THREE.Group();scene.add(wellGroup);const labels=[];
 WELLS.forEach(w=>{
-  w.tube=new THREE.Mesh(new THREE.CylinderGeometry(.6,.6,1,10),new THREE.MeshLambertMaterial({color:0xE8EDF5}));
+  w.tube=new THREE.Mesh(new THREE.CylinderGeometry(.6,.6,1,10),new THREE.MeshLambertMaterial({color:0x24364F}));
   w.head=new THREE.Mesh(new THREE.SphereGeometry(1.8,16,12),new THREE.MeshLambertMaterial({color:0xE8A33D}));
   w.tube.userData.well=w.head.userData.well=w;wellGroup.add(w.tube,w.head);
   const el=document.createElement('div');el.className='welllabel';el.textContent=w.n;document.body.appendChild(el);labels.push([w,el]);
@@ -242,6 +244,11 @@ function legend(){const el=document.getElementById('legend'),p=S.prop;
   el.innerHTML+='<span class="tag">Groningen field · NAM public model</span>';
 }
 
+/* ---------------- field statistics (computed from the data) ---------------- */
+const ST={n:0,cnt:[0,0,0],phi:[0,0,0],lk:[0,0,0]};
+for(let q=0;q<N;q++){const f=FAC[q];if(f===NA)continue;ST.n++;ST.cnt[f]++;ST.phi[f]+=phiV(q);ST.lk[f]+=lkV(q)}
+for(let f=0;f<3;f++){ST.phi[f]/=Math.max(1,ST.cnt[f]);ST.lk[f]/=Math.max(1,ST.cnt[f])}
+const fmtK=v=>{const k=Math.pow(10,v);return k>=10?Math.round(k).toString():k.toFixed(1)};
 /* ---------------- info panel ---------------- */
 const info=document.getElementById('info');
 function renderInfo(){
@@ -253,41 +260,49 @@ function renderInfo(){
         <button class="chip" id="closeWell">Back to overview</button>`;
       drawLogs(S.well);document.getElementById('closeWell').onclick=()=>{S.well=null;renderInfo()};return;
     }
-    info.innerHTML=`<span class="tag">Explore</span><h2>The Groningen gas field, cell by cell</h2>
-      <p>This is the real static reservoir model of the Groningen field, released publicly by NAM: sand, shaly sand and shale with their porosity and permeability.</p>
-      <ul><li>Press <b>Run GeoPix</b> to watch facies turn into a property model, layer by layer.</li><li>Slice with I, J and K to look inside.</li><li><b>Sand bodies only</b> shows the reservoir rock in 3D.</li><li>Click a well head for its logs.</li></ul>
-      <p class="note">Every 4th cell of the NAM Groningen model V6 is shown. The animation illustrates the workflow; the property values are the model's own reference values.</p>`;
+    info.innerHTML=`<span class="tag">Groningen field</span><h2>Reservoir at a glance</h2>
+      <div class="kv big"><div><span>Cells shown</span><b>${ST.n.toLocaleString()}</b></div><div><span>Layers</span><b>${NK}</b></div>
+      <div><span>Sand share</span><b>${Math.round(100*ST.cnt[0]/ST.n)}%</b></div><div><span>Sand porosity</span><b>${ST.phi[0].toFixed(2)}</b></div></div>
+      <p>Press <b>Run GeoPix</b>, then click a well head for its logs.</p>
+      <p class="note">NAM Groningen static model V6 (public), every 4th cell.</p>`;
   }
   if(S.tab==='tech'){
-    info.innerHTML=`<span class="tag">Technical</span><h2>Pix2Geomodel</h2>
-      <p>A conditional GAN trained on this field: it learns how porosity and permeability follow facies, layer by layer, then generates them where data is missing.</p>
-      <ol><li><b>Data:</b> map slices of the Groningen model, facies paired with each property.</li><li><b>Generator:</b> U-Net encoder–decoder with skip connections.</li><li><b>Discriminator:</b> PatchGAN, judging realism patch by patch.</li><li><b>Output:</b> porosity or permeability on the same grid, or facies back from a property.</li><li><b>QC:</b> wells, distributions and variograms before sign-off.</li></ol>
-      <p>Peer-reviewed: Al-Fakih et al. (2026), <i>Geoenergy Science and Engineering</i>, doi.org/10.1016/j.geoen.2025.214342. US patent application filed.</p>
-      <p class="note">Data: NAM Groningen static reservoir model V6, public release.</p>`;
+    info.innerHTML=`<span class="tag">Results</span><h2>Property by facies</h2>
+      <canvas id="bars" width="600" height="470" aria-label="Mean porosity and permeability for sand, shaly sand and shale"></canvas>
+      <p>Porosity and permeability follow the geology: sand highest, shale lowest.</p>
+      <div class="badges"><span>Peer-reviewed</span><span>US patent pending</span><span>Public field data</span></div>`;
+    drawBars();
   }
   if(S.tab==='biz'){
-    info.innerHTML=`<span class="tag">Business</span><h2>What faster modelling is worth</h2>
-      <p>Enter your own numbers. The defaults are examples only.</p>
+    info.innerHTML=`<span class="tag">Business</span><h2>Your time back</h2>
       <label class="field">Property models per year<input id="fModels" type="number" min="0" value="20"></label>
       <label class="field">Hours per model today<input id="fHrs" type="number" min="0" value="24"></label>
       <label class="field">Hours with GeoPix<input id="fG" type="number" min="0" value="2"></label>
       <label class="field">Cost per hour (USD)<input id="fCost" type="number" min="0" value="150"></label>
       <div class="kv"><div><span>Hours back / year</span><b id="rH">–</b></div><div><span>Days back / year</span><b id="rD">–</b></div><div><span>Saved / year</span><b id="rC">–</b></div><div><span>Faster</span><b id="rX">–</b></div></div>
-      <p>Built for oil &amp; gas, geothermal, CO₂ and energy storage, groundwater, mining and digital rocks.</p>
       <a class="cta" href="https://geopix-ai.com/#contact" target="_top">Start a 4-week benchmark</a>
-      <p class="note">Benchmark on your data, under NDA. No licence until it proves itself.</p>`;
+      <p class="note">Example inputs. Enter your own.</p>`;
     const f=()=>{const v=n=>+document.getElementById(n).value||0,m=v('fModels'),h=v('fHrs'),g=v('fG'),c=v('fCost'),s=Math.max(0,(h-g)*m);
       rH.textContent=Math.round(s).toLocaleString();rD.textContent=Math.round(s/8);rC.textContent='$'+Math.round(s*c).toLocaleString();rX.textContent=g>0?(h/g).toFixed(1)+'×':'–'};
     ['fModels','fHrs','fG','fCost'].forEach(n=>document.getElementById(n).addEventListener('input',f));f();
   }
 }
+function drawBars(){
+  const cv=document.getElementById('bars'),c=cv.getContext('2d'),W=cv.width,H=cv.height;c.clearRect(0,0,W,H);
+  const col=FC.map(f=>`rgb(${f.map(v=>Math.round(v*255))})`),names=['Sand','Shaly sand','Shale'];
+  const panel=(y0,title,vals,max,lab)=>{c.font='700 26px Archivo, sans-serif';c.fillStyle='#0E1628';c.fillText(title,16,y0+32);
+    vals.forEach((v,i)=>{const y=y0+50+i*52,w=Math.max(4,(W-300)*v/max);c.fillStyle='#55637A';c.font='600 22px Archivo, sans-serif';c.fillText(names[i],16,y+28);
+      c.fillStyle=col[i];c.fillRect(160,y+6,w,34);c.strokeStyle='rgba(14,22,40,.25)';c.strokeRect(160,y+6,w,34);c.fillStyle='#0E1628';c.font='500 22px IBM Plex Mono, monospace';c.fillText(lab(v),168+w+6,y+31)})};
+  panel(0,'Mean porosity (v/v)',ST.phi,Math.max(...ST.phi),v=>v.toFixed(2));
+  const kk=ST.lk.map(v=>v+3);panel(235,'Typical permeability (mD)',kk,Math.max(...kk),v=>fmtK(v-3));
+}
 function drawLogs(w){
   const cv=info.querySelector('canvas'),c=cv.getContext('2d'),W=cv.width,H=cv.height,top=34,bot=H-12,hk=(bot-top)/NK;
-  c.clearRect(0,0,W,H);c.font='600 18px Archivo, sans-serif';c.fillStyle='#93A0B5';
-  [['Facies',10,100],['Porosity',130,220],['log k (mD)',370,220]].forEach(([n,x,tw])=>{c.fillText(n,x,22);c.strokeStyle='rgba(255,255,255,.12)';c.strokeRect(x,top,tw,bot-top)});
+  c.clearRect(0,0,W,H);c.font='600 18px Archivo, sans-serif';c.fillStyle='#55637A';
+  [['Facies',10,100],['Porosity',130,220],['log k (mD)',370,220]].forEach(([n,x,tw])=>{c.fillText(n,x,22);c.strokeStyle='rgba(14,22,40,.18)';c.strokeRect(x,top,tw,bot-top)});
   for(let k=0;k<NK;k++){const q=id(w.i,w.j,k);if(FAC[q]===NA)continue;c.fillStyle=`rgb(${FC[FAC[q]].map(v=>Math.round(v*255))})`;c.fillRect(10,top+k*hk,100,hk+.5)}
   const curve=(x,tw,val,col)=>{c.beginPath();let st=false;for(let k=0;k<NK;k++){const q=id(w.i,w.j,k);if(FAC[q]===NA){st=false;continue}const yy=top+(k+.5)*hk,xx=x+Math.min(1,Math.max(0,val(q)))*tw;st?c.lineTo(xx,yy):c.moveTo(xx,yy);st=true}c.strokeStyle=col;c.lineWidth=3;c.stroke()};
-  curve(130,220,q=>(phiV(q)-PHI_LO)/(PHI_HI-PHI_LO),'#3FB0A4');curve(370,220,q=>(lkV(q)-LK_LO)/(LK_HI-LK_LO),'#E8A33D');
+  curve(130,220,q=>(phiV(q)-PHI_LO)/(PHI_HI-PHI_LO),'#1F7A72');curve(370,220,q=>(lkV(q)-LK_LO)/(LK_HI-LK_LO),'#E8A33D');
 }
 
 /* ---------------- controls ---------------- */
