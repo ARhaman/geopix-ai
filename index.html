@@ -438,7 +438,7 @@
           <div class="arrow2" aria-hidden="true">⇄</div>
           <div class="node core"><svg class="ic"><use href="#i-brain"/></svg><b>Pix2Geomodel</b><small>generative AI</small></div>
           <div class="arrow2" aria-hidden="true">⇄</div>
-          <div class="node"><svg class="ic"><use href="#i-chart"/></svg><b>Properties</b><small>porosity · permeability · Sw</small></div>
+          <div class="node"><svg class="ic"><use href="#i-chart"/></svg><b>Properties</b><small>porosity · permeability</small></div>
         </div>
         <div class="steps" style="text-align:left">
           <div class="step"><div class="n">01</div><h3>Prepare</h3><p>Aligned facies and property models.</p></div>
@@ -474,7 +474,6 @@
               <div class="pills" id="props">
                 <button type="button" class="pill" data-p="phi" aria-pressed="true">Porosity</button>
                 <button type="button" class="pill" data-p="k" aria-pressed="false">Permeability</button>
-                <button type="button" class="pill" data-p="sw" aria-pressed="false">Water Saturation</button>
               </div>
             </div>
             <div>
@@ -697,7 +696,7 @@
         x.fillStyle='rgba('+p.c+',.55)';x.beginPath();x.arc(p.x*W,p.y*H,p.s*1.3,0,7);x.fill()})})()})();
 
   /* hero slides: real results */
-  (function(){var SL=[['fphi',10,'Facies → Porosity','GeoPix porosity'],['fk',11,'Facies → Permeability','GeoPix permeability'],['fsw',2,'Facies → Water saturation','GeoPix Sw'],['fphi',2,'Facies → Porosity','GeoPix porosity'],['fk',7,'Facies → Permeability','GeoPix permeability'],['fphi',9,'Facies → Porosity','GeoPix porosity']];
+  (function(){var SL=[['fphi',10,'Facies → Porosity','GeoPix porosity'],['fk',11,'Facies → Permeability','GeoPix permeability'],['fk',2,'Facies → Permeability','GeoPix permeability'],['fphi',2,'Facies → Porosity','GeoPix porosity'],['fk',7,'Facies → Permeability','GeoPix permeability'],['fphi',9,'Facies → Porosity','GeoPix porosity']];
     var i=0,inp=$('#hwIn'),out=$('#hwOut'),dots=$('#hwDots'),line=document.querySelector('.hview .hl');
     SL.forEach(function(x,k){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Result '+(k+1));b.onclick=function(){show(k)};dots.appendChild(b)});
     function pad(n){return (n<10?'0':'')+n}
@@ -710,8 +709,8 @@
   /* demo */
   var PICK=[10,11,2,7,9],FAC='<span><i style="background:#F8F808"></i>Sand</span><span><i style="background:#F8A808"></i>Shaly sand</span><span><i style="background:#808080"></i>Shale</span>';
   var JET='linear-gradient(90deg,#0000A8,#0008F8,#00C8F8,#08F890,#C8F808,#F8D808,#F87808,#C80808)';
-  var PROP={phi:'Porosity',k:'Permeability',sw:'Water Saturation'};
-  var SETS={fwd:{phi:'fphi',k:'fk',sw:'fsw'},inv:{phi:'phif'}};
+  var PROP={phi:'Porosity',k:'Permeability'};
+  var SETS={fwd:{phi:'fphi',k:'fk'},inv:{phi:'phif'}};
   var st={dir:'fwd',prop:'phi',n:0};
   var ramp=function(p){return '<span>'+PROP[p]+'</span><span>Low<i class="ramp" style="background:'+JET+'"></i>High</span>'};
   var cmp=$('#cmp'),cr=$('#cmpR'),cv=$('#cmpV');

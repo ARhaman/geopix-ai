@@ -156,7 +156,7 @@ footer{font-size:13px;color:var(--dim);max-width:90ch}
     <div>
       <a class="brand" href="./" style="text-decoration:none;color:inherit">GEOPIX <span>AI</span> <span style="color:var(--dim);font-weight:600;letter-spacing:0;margin-left:10px">← geopix-ai.com</span></a>
       <h1>Unit C has no core. The review is on Thursday.</h1>
-      <p class="lede">A geomodeler needs porosity, permeability and water saturation for an interval with almost no data. Follow the same task two ways.</p>
+      <p class="lede">A geomodeler needs porosity and permeability for an interval with almost no data. Follow the same task two ways.</p>
     </div>
   </header>
 
@@ -170,7 +170,6 @@ footer{font-size:13px;color:var(--dim);max-width:90ch}
           <button class="chip" id="p-facies" data-p="facies" aria-pressed="false">Facies</button>
           <button class="chip" id="p-phi" data-p="phi" aria-pressed="true">Porosity</button>
           <button class="chip" id="p-k" data-p="k" aria-pressed="false">Permeability</button>
-          <button class="chip" id="p-sw" data-p="sw" aria-pressed="false">Sw</button>
         </div>
       </div>
       <canvas id="cv" role="img" aria-label="Reservoir cross-section with three units and four wells"></canvas>
@@ -199,14 +198,13 @@ const CONV=[
  {t:'Gap: Unit C has no core',d:'Request a coring run and an extra logging suite. Rig time and lab turnaround put those weeks to months away, so work continues on analogue assumptions.',h:2,req:true},
  {t:'Populate porosity',d:'Sequential Gaussian simulation conditioned to facies, using borrowed variograms.',h:4,fill:'phi'},
  {t:'Populate permeability',d:'Poro–perm transform per facies plus co-kriging.',h:4,fill:'k'},
- {t:'Populate water saturation',d:'Saturation–height function by facies.',h:3,fill:'sw'},
  {t:'Sensitivity runs',d:'Dozens of realizations across variogram ranges and trends to bracket the uncertainty that the missing core created.',h:8,sens:true},
  {t:'Review and rework',d:'The reservoir engineer flags unrealistic permeability contrasts in two zones. Back to step 6.',h:4}
 ];
 const GP=[
  {t:'Load facies model and wells',d:'The inputs the geomodeler already has. No new acquisition is needed to start.',h:.25},
- {t:'Fine-tune on the data-rich units',d:'The model learns how porosity, permeability and saturation follow facies in Units A and B, where cores and logs exist.',h:.75},
- {t:'Predict Unit C',d:'All three properties generated from Unit C facies in one pass.',h:.05,fill:'all'},
+ {t:'Fine-tune on the data-rich units',d:'The model learns how porosity and permeability follow facies in Units A and B, where cores and logs exist.',h:.75},
+ {t:'Predict Unit C',d:'Both properties generated from Unit C facies in one pass.',h:.05,fill:'all'},
  {t:'Check against the wells',d:'Compare with the partial log Unit C does have. Mismatches are flagged for the geologist.',h:.35},
  {t:'Facies scenarios',d:'Swap in alternative facies realizations and regenerate properties in seconds each. Sensitivity becomes cheap.',h:.15,sens:true},
  {t:'Geologist review and sign-off',d:'The expert stays in charge. Time goes to judgment instead of populating cells.',h:.35}
@@ -355,7 +353,7 @@ function renderPanel(){
   if(sc===0){panel.innerHTML=`<span class="eyebrow">The brief</span>
     <h2>Properties for Unit C before the well-planning review</h2>
     <p>Units A and B are well characterised: cores in three wells and full log suites. Unit C has a facies model, no core, and one partial log.</p>
-    <p>The asset team wants porosity, permeability and water saturation across Unit C, with an uncertainty range, by Thursday.</p>
+    <p>The asset team wants porosity and permeability across Unit C, with an uncertainty range, by Thursday.</p>
     <p class="note">Use the property buttons to see what exists today. Unit C is blank.</p>
     <div class="actions"><button class="btn" data-go="1">Do it the conventional way</button><button class="btn ghost" data-go="2">Skip to GeoPix AI</button></div>`;}
   if(sc===1){const i=S.conv.i,h=i<0?0:hoursTo(CONV,i),done=i>=CONV.length-1;
