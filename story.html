@@ -377,7 +377,7 @@ function renderFull(){
     const t=T.find(x=>x[0]===S.ev)||T[0];
     full.innerHTML=`<div class="card full">
       <div><span class="eyebrow">The evidence</span><h2 style="font-family:var(--display);font-size:24px;margin:4px 0 0">The story above is a schematic. This is the measured result.</h2>
-      <p class="note" style="margin-top:6px;max-width:70ch">Everything on this page so far was drawn to explain the workflow. The figures and numbers below come from the peer-reviewed study on the Groningen field dataset.</p></div>
+      <p class="note" style="margin-top:6px;max-width:70ch">Everything on this page so far was drawn to explain the workflow. The figures and numbers below come from the peer-reviewed study on a public field dataset.</p></div>
       <div class="ev">
         <div class="ev-fig">
           <div class="evctl">
@@ -393,10 +393,10 @@ function renderFull(){
             <input type="range" id="evr" min="0" max="100" value="${S.evPos}" aria-label="Drag to compare">
           </div>
           <div class="lg">${S.evMode==='facies'?FL:''}${t[3]}</div>
-          <p class="note">One slice of the Groningen field model. ${S.evMode==='facies'?'Drag the handle: the facies on the left is the only input, and the property on the right is what GeoPix generated from it.':'Drag the handle to compare GeoPix output with the reference property on the same slice.'} Figures from Al-Fakih et al. (2026).</p>
+          <p class="note">One slice of the field model. ${S.evMode==='facies'?'Drag the handle: the facies on the left is the only input, and the property on the right is what GeoPix generated from it.':'Drag the handle to compare GeoPix output with the reference property on the same slice.'} Figures from Al-Fakih et al. (2026).</p>
         </div>
         <div class="ev-tab">
-          <p class="note" style="font-size:16px">Peer-reviewed in <i>Geoenergy Science and Engineering</i> (2026) on the Groningen field dataset. Full method and evaluation in the paper: doi.org/10.1016/j.geoen.2025.214342.</p>
+          <p class="note" style="font-size:16px">Peer-reviewed in <i>Geoenergy Science and Engineering</i> (2026) on a public field dataset. Full method and evaluation in the paper: doi.org/10.1016/j.geoen.2025.214342.</p>
         </div>
       </div>
       <div><span class="eyebrow">Evidence ledger</span>

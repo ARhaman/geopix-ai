@@ -3,7 +3,7 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: full-window 3D viewport of the real Groningen model; controls float left, info panel right. Light theme to match geopix-ai.com. */
+/* Layout: full-window 3D viewport of the real reservoir model; controls float left, info panel right. Light theme to match geopix-ai.com. */
 :root{
   --bg:#EEF1F6; --panel:rgba(255,255,255,.93); --panel-2:#F3F5F9; --line:rgba(14,22,40,.11);
   --ink:#0E1628; --dim:#55637A; --amber:#E8A33D; --amber-ink:#8F5B08; --teal:#1F7A72; --slow:#C25A3E;
@@ -77,8 +77,8 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 }
 </style>
 
-<div id="scene" role="img" aria-label="3D view of the Groningen reservoir model with wells; drag to rotate, scroll to zoom"></div>
-<div class="loading" id="loading">Loading the Groningen reservoir model…</div>
+<div id="scene" role="img" aria-label="3D view of the reservoir model with wells; drag to rotate, scroll to zoom"></div>
+<div class="loading" id="loading">Loading the model…</div>
 
 <div class="topbar">
   <div class="brand">GeoPix <b>AI</b> <small>Reservoir Lab</small></div>
@@ -133,11 +133,11 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 (async()=>{
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-/* ---------------- real data: NAM Groningen static model V6 (public), every 4th cell ---------------- */
+/* ---------------- real data: public static reservoir model, every 4th cell ---------------- */
 let meta,buf;
 try{
-  meta=await (await fetch('groningen.json')).json();
-  const b64=(await (await fetch('groningen.b64.txt')).text()).trim();
+  meta=await (await fetch('model.json')).json();
+  const b64=(await (await fetch('model.b64.txt')).text()).trim();
   const raw=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
   buf=new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer());
 }catch(e){document.getElementById('loading').textContent='Could not load the reservoir model. Reload the page to try again.';return}
@@ -239,7 +239,7 @@ function legend(){const el=document.getElementById('legend'),p=S.prop;
   if(p==='facies')el.innerHTML=FN.map((n,i)=>`<span><i class="sw" style="background:rgb(${FC[i].map(v=>Math.round(v*255))})"></i>${n}</span>`).join('');
   if(p==='phi')el.innerHTML=`<span>Porosity</span><span>${PHI_LO}<i class="ramp" style="background:${css(JET)}"></i>${PHI_HI} v/v</span>`;
   if(p==='perm')el.innerHTML=`<span>Permeability</span><span>0.01<i class="ramp" style="background:${css(PJET)}"></i>1000 mD</span>`;
-  el.innerHTML+='<span class="tag">Groningen field · NAM public model</span>';
+  el.innerHTML+='<span class="tag">Public field data</span>';
 }
 
 /* ---------------- field statistics (computed from the data) ---------------- */
@@ -254,7 +254,7 @@ function renderInfo(){
     if(S.well){
       info.innerHTML=`<span class="tag">Well column</span><h2>${S.well.n}</h2>
         <div id="logs"><canvas width="600" height="600" aria-label="Facies, porosity and permeability down ${S.well.n}"></canvas></div>
-        <p class="note">Facies · porosity · log permeability through all ${NK} layers at this location, from the Groningen model.</p>
+        <p class="note">Facies · porosity · log permeability through all ${NK} layers at this location, from the reservoir model.</p>
         <button class="chip" id="closeWell">Back to results</button>`;
       drawLogs(S.well);document.getElementById('closeWell').onclick=()=>{S.well=null;S.tab='tech';syncTabs();renderInfo()};return;
     }
