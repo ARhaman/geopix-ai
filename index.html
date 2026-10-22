@@ -204,6 +204,15 @@
   .fine{font-size:13.5px;color:var(--dim);margin:14px 0 0}
   @media (max-width:900px){.appbody{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid var(--rule)}.seg{grid-template-columns:1fr 1fr}}
   .more{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}
+  .ex.up6{grid-template-columns:repeat(6,1fr)}
+  .ex button.upl{display:grid;place-items:center;background:#fff;border-style:dashed;color:var(--ink);font:700 11px/1.15 var(--sans,inherit);text-align:center}
+  .ex button.upl span{display:block;font-size:20px;line-height:1;color:var(--amber-d,#B87A12)}
+  .ex button.upl:disabled{opacity:.45;cursor:not-allowed}
+  .cmp.upmode .kx,.cmp.upmode .kxy,.cmp.upmode .tag.l,.cmp.upmode .bar{display:none}
+  .cmp.upmode .top{clip-path:inset(var(--vpos,30%) 0 0 0)}
+  .cmp .busy{position:absolute;inset:0;display:none;place-items:center;background:rgba(243,244,247,.72);font-weight:700;color:var(--ink);text-align:center;padding:20px;z-index:3}
+  .cmp.loading .busy{display:grid}
+  .status.err{color:#C25A3E}
   .soonbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:18px;padding:14px 18px;border-radius:16px;background:linear-gradient(90deg,#1B2E52,#2E6FA8);color:#fff}
   .soonbar .badge2{font-size:11.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#1A1205;background:var(--amber);border-radius:999px;padding:5px 11px}
   .soonbar b{font-size:17px}.soonbar span.t{color:#D6E2F2;font-size:15px}
@@ -498,9 +507,11 @@
               <button type="button" class="knob kxy" data-ax="xy" aria-label="Drag both dividers">✥</button>
               <input type="range" class="sr" min="0" max="100" value="50" id="cmpR" aria-label="Reference versus GeoPix divider">
               <input type="range" class="sr" min="0" max="100" value="30" id="cmpV" aria-label="Input versus GeoPix divider">
+              <div class="busy" id="busy">Running the GeoPix model…</div>
             </div>
+            <input type="file" id="upFile" accept="image/png,image/jpeg,image/webp" hidden>
             <div class="legend" id="lg"></div>
-            <p class="hint">Drag the handles, or click the map. ⇆ reference vs GeoPix · ⇅ input vs GeoPix</p>
+            <p class="hint" id="hint">Drag the handles, or click the map. ⇆ reference vs GeoPix · ⇅ input vs GeoPix</p>
           </div>
         </div>
       </div>
@@ -520,7 +531,7 @@
           <div class="row"><span>Real reservoir model, public field data.</span><a href="lab/" target="_blank" rel="noopener">Full screen ↗</a></div>
         </div>
       </div>
-      <div class="soonbar reveal"><span class="badge2">Coming soon</span><b>Upload your own map</b><span class="t">and get the GeoPix result in seconds.</span><a href="#contact" data-interest="Technical Demonstration">Request early access →</a></div>
+      <div class="soonbar reveal"><span class="badge2">Live</span><b>Upload your own facies map</b><span class="t">Get porosity or permeability from the real Pix2Geomodel model.</span><a href="#demo" id="upGo">Try it in GeoPix Studio →</a></div>
     </div>
   </section>
 
@@ -714,33 +725,57 @@
   var JET='linear-gradient(90deg,#0000A8,#0008F8,#00C8F8,#08F890,#C8F808,#F8D808,#F87808,#C80808)';
   var PROP={phi:'Porosity',k:'Permeability'};
   var SETS={fwd:{phi:'fphi',k:'fk'},inv:{phi:'phif'}};
-  var st={dir:'fwd',prop:'phi',n:0};
+  var st={dir:'fwd',prop:'phi',n:0,up:null};
+  var SPACE='https://aljaser2030-geopix-ai.hf.space',canUp=function(){return st.dir==='fwd'};
   var ramp=function(p){return '<span>'+PROP[p]+'</span><span>Low<i class="ramp" style="background:'+JET+'"></i>High</span>'};
   var cmp=$('#cmp'),cr=$('#cmpR'),cv=$('#cmpV');
   var setX=function(v){cr.value=v;cmp.style.setProperty('--pos',v+'%')},setY=function(v){cv.value=v;cmp.style.setProperty('--vpos',v+'%')};
   function render(){
+    if(st.up&&!canUp())st.up=null;
+    cmp.classList.toggle('upmode',!!st.up);$('#hint').textContent=st.up?'Your map, run live through the GeoPix model. Drag ⇅ to compare your facies with the generated '+PROP[st.prop].toLowerCase()+'.':'Drag the handles, or click the map. ⇆ reference vs GeoPix · ⇅ input vs GeoPix';
     var set=SETS[st.dir][st.prop],sl=PICK[st.n],path='assets/demo/'+set+'/'+(sl<10?'0':'')+sl;
     var fwd=st.dir==='fwd',P=PROP[st.prop];
     $('#pair').innerHTML=fwd?'Facies<i>→</i>'+P:P+'<i>→</i>Facies';
     $('#dFac').src=path+'i.jpg';$('#tFac').textContent=fwd?'Facies':P;
     $('#dOut').src=path+'p.jpg';$('#dOut').alt='GeoPix predicted '+(fwd?P.toLowerCase():'facies')+' map';
     $('#dRef').src=path+'g.jpg';$('#dRef').alt='Reference '+(fwd?P.toLowerCase():'facies')+' map';
+    if(st.up){$('#dFac').src=st.up.fac;$('#tFac').textContent='Your facies';var o=st.up.out||st.up.fac;$('#dOut').src=o;$('#dRef').src=o;$('#dOut').alt='GeoPix '+P.toLowerCase()+' generated from your facies map'}
     $('#lg').innerHTML=FAC+'<span style="width:12px"></span>'+ramp(st.prop);
     var strip=$('#strip');strip.innerHTML='';
     PICK.forEach(function(sn,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Example '+(i+1));b.setAttribute('aria-pressed',String(i===st.n));
-      b.innerHTML='<b>'+(i+1)+'</b><img src="assets/demo/'+set+'/'+(sn<10?'0':'')+sn+'i.jpg" alt="">';b.onclick=function(){st.n=i;render();run()};strip.appendChild(b)});
+      b.setAttribute('aria-pressed',String(i===st.n&&!st.up));b.innerHTML='<b>'+(i+1)+'</b><img src="assets/demo/'+set+'/'+(sn<10?'0':'')+sn+'i.jpg" alt="">';b.onclick=function(){st.n=i;st.up=null;render();run()};strip.appendChild(b)});
+    strip.classList.add('up6');var u=document.createElement('button');u.type='button';u.className='upl';u.setAttribute('aria-pressed',String(!!st.up));u.disabled=!canUp();u.title=canUp()?'Upload your own facies map':'Live upload: Facies → Properties';u.innerHTML=st.up?'<img src="'+st.up.fac+'" alt="">':'<div><span>+</span>Your map</div>';u.onclick=function(){$('#upFile').click()};strip.appendChild(u);
     document.querySelectorAll('.seg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.dir===st.dir))});
     document.querySelectorAll('#props .pill').forEach(function(b){var ok=!!SETS[st.dir][b.dataset.p];b.disabled=!ok;b.title=ok?'':'Coming soon';b.setAttribute('aria-pressed',String(b.dataset.p===st.prop))});
   }
   var running=false;
-  function run(){ if(running)return;running=true;var btn=$('#runBtn');btn.disabled=true;$('#status').textContent='Generating…';setX(50);
+  function sse(t){var m=t.split('event:');for(var i=m.length-1;i>=0;i--){var b=m[i].trim();var ev=b.split('\n')[0].trim(),d=(b.split('data:')[1]||'').trim();if(ev==='complete')return {ok:true,d:JSON.parse(d)};if(ev==='error')return {ok:false,d:d}}return {ok:false,d:'no result'}}
+  function live(){var btn=$('#runBtn'),S=$('#status');running=true;btn.disabled=true;S.classList.remove('err');cmp.classList.add('loading');
+    var slow=setTimeout(function(){$('#busy').textContent='Waking up the GeoPix model… the first run can take up to a minute.'},4000);
+    S.textContent='Running the GeoPix model…';var fd=new FormData();fd.append('files',st.up.file,st.up.file.name||'facies.png');
+    fetch(SPACE+'/gradio_api/upload',{method:'POST',body:fd}).then(function(r){if(!r.ok)throw new Error('upload '+r.status);return r.json()})
+    .then(function(p){return fetch(SPACE+'/gradio_api/call/predict',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({data:[{path:p[0],meta:{_type:'gradio.FileData'}},(st.prop==='k'?'Facies → Permeability':'Facies → Porosity')]})})})
+    .then(function(r){if(!r.ok)throw new Error('call '+r.status);return r.json()})
+    .then(function(j){return fetch(SPACE+'/gradio_api/call/predict/'+j.event_id)}).then(function(r){return r.text()})
+    .then(function(t){var x=sse(t);if(!x.ok)throw new Error(x.d&&x.d!=='null'?x.d:'The model could not process this image');var f=x.d[0];var url=f.path?SPACE+'/gradio_api/file='+f.path:f.url;
+      st.up.out=url;var im=new Image();im.onload=function(){render();finish(true)};im.onerror=function(){finish(false,'Could not load the result')};im.src=url})
+    .catch(function(e){finish(false,e&&e.message)});
+    function finish(ok,why){clearTimeout(slow);cmp.classList.remove('loading');$('#busy').textContent='Running the GeoPix model…';running=false;btn.disabled=false;
+      if(ok){S.textContent='Done · live GeoPix '+PROP[st.prop].toLowerCase()+' · drag ⇅ to compare';setY(100);var t0=performance.now();(function step(now){var p=Math.min(1,(now-t0)/1200),e=1-Math.pow(1-p,3);setY(100-70*e);if(p<1)requestAnimationFrame(step)})(t0)}
+      else{S.classList.add('err');S.textContent='Could not run the model right now'+(why&&/[a-z]/i.test(why)&&why.length<140?' ('+why.replace(/^Error:\s*/,'')+')':'')+'. Please try again in a minute.'}}
+  }
+  $('#upFile').addEventListener('change',function(e){var f=e.target.files[0];e.target.value='';if(!f)return;
+    if(f.size>15e6){$('#status').textContent='That file is over 15 MB. Please use a smaller image.';return}
+    if(st.up&&st.up.fac)URL.revokeObjectURL(st.up.fac);st.up={file:f,fac:URL.createObjectURL(f),out:null};setX(50);render();setY(100);live()});
+  $('#upGo').addEventListener('click',function(){st.dir='fwd';render();setTimeout(function(){$('#upFile').click()},450)});
+  function run(){ if(running)return;if(st.up){live();return}running=true;var btn=$('#runBtn');btn.disabled=true;$('#status').textContent='Generating…';setX(50);
     if(reduce){setY(30);done();return}
     var t0=performance.now(),T=1500;setY(100);
     (function step(now){var p=Math.min(1,(now-t0)/T),e=1-Math.pow(1-p,3);setY(100-70*e);if(p<1)requestAnimationFrame(step);else done()})(t0);
     function done(){running=false;btn.disabled=false;$('#status').textContent='Done · drag to compare'}
   }
   $('.seg').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;st.dir=b.dataset.dir;if(!SETS[st.dir][st.prop])st.prop='phi';st.n=0;render();run()});
-  $('#props').addEventListener('click',function(e){var b=e.target.closest('.pill');if(!b||b.disabled)return;st.prop=b.dataset.p;st.n=0;render();run()});
+  $('#props').addEventListener('click',function(e){var b=e.target.closest('.pill');if(!b||b.disabled)return;st.prop=b.dataset.p;if(st.up)st.up.out=null;else st.n=0;render();run()});
   $('#runBtn').addEventListener('click',run);
   cr.addEventListener('input',function(){setX(cr.value)});cv.addEventListener('input',function(){setY(cv.value)});
   var drag=null,pt=function(e){var r=cmp.getBoundingClientRect();return [Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100)),Math.max(2,Math.min(98,(e.clientY-r.top)/r.height*100))]};
