@@ -1,4 +1,5 @@
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>GeoPix Reservoir Lab</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -67,7 +68,7 @@ button:focus-visible,input:focus-visible,a:focus-visible{outline:2px solid var(-
 .hint{font-size:12px;color:var(--dim);margin:0}
 .sweep{position:fixed;z-index:4;left:50%;top:76px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:6px 14px;font-size:12.5px;color:var(--dim)}
 .loading{position:fixed;inset:0;display:grid;place-items:center;z-index:6;font-size:15px;color:var(--dim);background:var(--bg)}
-.embed .info{display:none}.embed.info-open .info{display:flex}
+.embed .info,.compact .info{display:none}.embed.info-open .info,.compact.info-open .info{display:flex}
 @media (max-width:900px){
   .rail{top:auto;bottom:62px;left:12px;right:12px;width:auto;max-height:38%}
   .info{top:64px;left:12px;right:12px;width:auto;max-height:30%}
@@ -216,8 +217,9 @@ WELLS.forEach(w=>{
 });
 function placeWells(){WELLS.forEach(w=>{const h=NK*S.ve+22;w.tube.scale.set(1,h,1);w.tube.position.set(w.i+.5,h/2,w.j+.5);w.head.position.set(w.i+.5,h,w.j+.5)})}
 
-function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix()}
+function resize(){renderer.setSize(innerWidth,innerHeight);camera.aspect=innerWidth/innerHeight;if(innerWidth<=700&&innerWidth<innerHeight)camera.setViewOffset(innerWidth,innerHeight,0,innerHeight*0.17,innerWidth,innerHeight);else camera.clearViewOffset();camera.updateProjectionMatrix()}
 addEventListener('resize',resize);resize();
+if(innerWidth<innerHeight){const f=Math.min(2.6,Math.pow(innerHeight/innerWidth,0.9));camera.position.sub(controls.target).multiplyScalar(f).add(controls.target)}
 const v3=new THREE.Vector3();
 function loop(){controls.update();renderer.render(scene,camera);
   labels.forEach(([w,el])=>{v3.copy(w.head.position).project(camera);const vis=S.wells&&v3.z<1;el.hidden=!vis;if(vis){el.style.left=((v3.x+1)/2*innerWidth)+'px';el.style.top=((1-v3.y)/2*innerHeight)+'px'}});
@@ -290,8 +292,10 @@ function drawLogs(w){
 const $=s=>document.querySelector(s);
 function syncTabs(){document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===S.tab)))}
 const EMB=window.self!==window.top||/[?&]embed/.test(location.search);if(EMB)document.body.classList.add('embed');
+const CMP=matchMedia('(max-width:700px)').matches;if(CMP)document.body.classList.add('compact');
+if(matchMedia('(pointer:coarse)').matches){const h=document.querySelector('.hint');if(h)h.textContent='Drag to rotate · pinch to zoom · tap a well head for its logs'}
 const openInfo=()=>document.body.classList.add('info-open');
-$('.tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if(EMB&&S.tab===b.dataset.tab&&document.body.classList.contains('info-open')){document.body.classList.remove('info-open');return}openInfo();S.tab=b.dataset.tab;if(S.tab!=='explore')S.well=null;syncTabs();renderInfo()});
+$('.tabs').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;if((EMB||CMP)&&S.tab===b.dataset.tab&&document.body.classList.contains('info-open')){document.body.classList.remove('info-open');return}openInfo();S.tab=b.dataset.tab;if(S.tab!=='explore')S.well=null;syncTabs();renderInfo()});
 function setProp(p){S.prop=p;document.querySelectorAll('#propSeg button').forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.prop===p)));legend();recolor();if(S.well)drawLogs(S.well)}
 $('#propSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(b&&S.run<0)setProp(b.dataset.prop)});
 $('#dirSeg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b||S.run>=0)return;S.dir=b.dataset.dir;document.querySelectorAll('#dirSeg button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)))});

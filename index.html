@@ -105,6 +105,7 @@
   @keyframes hline{0%,10%{left:100%}50%,70%{left:0%}100%{left:0%;opacity:0}}
   .hdots{display:flex;gap:6px;justify-content:center;margin:12px 0 0}
   .hdots button{width:8px;height:8px;border-radius:50%;border:0;padding:0;background:#3A4A68;cursor:pointer}
+  .hdots button{position:relative}.hdots button::after{content:'';position:absolute;inset:-10px -6px}
   .hdots button[aria-current="true"]{background:var(--amber);width:22px;border-radius:5px}
   .hwin .cap{font-size:12.5px;color:var(--dim-d);margin:8px 2px 0;text-align:center}
   @media (prefers-reduced-motion:reduce){.hview .hf,.hview .hl,.nmark .fac,.nmark .scan{animation:none}.hview .hf{clip-path:inset(0 50% 0 0)}.hview .hl{left:50%}.nmark .fac{clip-path:inset(0 0 0 100%)}}
