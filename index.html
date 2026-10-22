@@ -163,7 +163,7 @@
   .appbar i{width:11px;height:11px;border-radius:50%;background:#2B3A57}.appbar i:first-child{background:#E86A5B}.appbar i:nth-child(2){background:var(--amber)}.appbar i:nth-child(3){background:var(--teal)}
   .appbar span{margin-left:10px}.appbar em{margin-left:auto;font-style:normal;font-size:12.5px;color:var(--amber)}
   .appbody{display:grid;grid-template-columns:330px 1fr;min-height:560px}
-  .side{background:#F7F8FB;border-right:1px solid var(--rule);padding:24px;display:flex;flex-direction:column;gap:22px}
+  .side{min-width:0;background:#F7F8FB;border-right:1px solid var(--rule);padding:24px;display:flex;flex-direction:column;gap:22px}
   .side .lab{font-size:12.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--dim);margin:0 0 10px}
   .seg{display:grid;grid-template-columns:1fr;gap:6px}
   .seg button,.pill{font:700 15px var(--display);text-align:left;border:1.5px solid var(--rule);background:var(--card);color:var(--text);border-radius:12px;padding:12px 14px;cursor:pointer;transition:border-color .15s,background .15s}
@@ -171,10 +171,10 @@
   .pills{display:flex;flex-wrap:wrap;gap:8px}
   .pill{padding:9px 14px;border-radius:999px;font-size:14.5px}
   .pill:disabled{opacity:.4;cursor:not-allowed}
-  .ex{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
-  .ex button{position:relative;aspect-ratio:1/1;padding:3px;border:2px solid var(--rule);border-radius:10px;background:#EEF1F6;cursor:pointer}
+  .ex{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+  .ex button{position:relative;min-width:0;aspect-ratio:1/1;padding:3px;border:2px solid var(--rule);border-radius:10px;background:#EEF1F6;cursor:pointer}
   .ex button[aria-pressed="true"]{border-color:var(--amber);box-shadow:0 6px 18px rgba(232,163,61,.35)}
-  .ex img{width:100%;height:100%;object-fit:contain}
+  .ex img{display:block;width:100%;height:100%;min-width:0;object-fit:contain}
   .ex b{position:absolute;top:3px;left:3px;font-size:10.5px;background:var(--ink);color:#fff;border-radius:999px;min-width:17px;height:17px;display:grid;place-items:center}
   .run{font:800 17px var(--display);border:0;border-radius:14px;padding:16px;background:linear-gradient(90deg,var(--amber),#F2C267);color:#1A1205;cursor:pointer;box-shadow:0 10px 26px rgba(232,163,61,.35);display:flex;justify-content:center;align-items:center;gap:10px}
   .run:disabled{opacity:.7;cursor:progress}
@@ -204,9 +204,9 @@
   .fine{font-size:13.5px;color:var(--dim);margin:14px 0 0}
   @media (max-width:900px){.appbody{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid var(--rule)}.seg{grid-template-columns:1fr 1fr}}
   .more{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}
-  .ex.up6{grid-template-columns:repeat(6,1fr)}
-  .ex button.upl{display:grid;place-items:center;background:#fff;border-style:dashed;color:var(--ink);font:700 11px/1.15 var(--sans,inherit);text-align:center}
-  .ex button.upl span{display:block;font-size:20px;line-height:1;color:var(--amber-d,#B87A12)}
+  .ex button.upl{grid-column:1/-1;aspect-ratio:auto;min-height:46px;display:flex;align-items:center;justify-content:center;gap:10px;padding:6px 12px;background:#fff;border-style:dashed;border-color:var(--amber);color:var(--ink);font:700 14px/1.2 var(--sans,inherit)}
+  .ex button.upl span{font-size:22px;line-height:1;color:var(--amber-d,#B87A12)}
+  .ex button.upl img{width:34px;height:34px;flex:none}
   .ex button.upl:disabled{opacity:.45;cursor:not-allowed}
   .cmp.upmode .kx,.cmp.upmode .kxy,.cmp.upmode .tag.l,.cmp.upmode .bar{display:none}
   .cmp.upmode .top{clip-path:inset(var(--vpos,30%) 0 0 0)}
@@ -744,7 +744,7 @@
     var strip=$('#strip');strip.innerHTML='';
     PICK.forEach(function(sn,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Example '+(i+1));b.setAttribute('aria-pressed',String(i===st.n));
       b.setAttribute('aria-pressed',String(i===st.n&&!st.up));b.innerHTML='<b>'+(i+1)+'</b><img src="assets/demo/'+set+'/'+(sn<10?'0':'')+sn+'i.jpg" alt="">';b.onclick=function(){st.n=i;st.up=null;render();run()};strip.appendChild(b)});
-    strip.classList.add('up6');var u=document.createElement('button');u.type='button';u.className='upl';u.setAttribute('aria-pressed',String(!!st.up));u.disabled=!canUp();u.title=canUp()?'Upload your own facies map':'Live upload: Facies → Porosity (permeability coming soon)';u.innerHTML=st.up?'<img src="'+st.up.fac+'" alt="">':'<div><span>+</span>Your map</div>';u.onclick=function(){$('#upFile').click()};strip.appendChild(u);
+    var u=document.createElement('button');u.type='button';u.className='upl';u.setAttribute('aria-pressed',String(!!st.up));u.disabled=!canUp();u.title=canUp()?'Upload your own facies map':'Live upload: Facies → Porosity (permeability coming soon)';u.innerHTML=st.up?'<img src="'+st.up.fac+'" alt="">Your map · upload another':'<span>+</span>Upload your own facies map';u.onclick=function(){$('#upFile').click()};strip.appendChild(u);
     document.querySelectorAll('.seg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.dir===st.dir))});
     document.querySelectorAll('#props .pill').forEach(function(b){var ok=!!SETS[st.dir][b.dataset.p];b.disabled=!ok;b.title=ok?'':'Coming soon';b.setAttribute('aria-pressed',String(b.dataset.p===st.prop))});
   }
