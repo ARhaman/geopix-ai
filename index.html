@@ -531,7 +531,7 @@
           <div class="row"><span>Real reservoir model, public field data.</span><a href="lab/" target="_blank" rel="noopener">Full screen ↗</a></div>
         </div>
       </div>
-      <div class="soonbar reveal"><span class="badge2">Live</span><b>Upload your own facies map</b><span class="t">Get porosity or permeability from the real Pix2Geomodel model.</span><a href="#demo" id="upGo">Try it in GeoPix Studio →</a></div>
+      <div class="soonbar reveal"><span class="badge2">Live</span><b>Upload your own facies map</b><span class="t">Facies → Porosity, generated live by the real Pix2Geomodel model.</span><a href="#demo" id="upGo">Try it in GeoPix Studio →</a></div>
     </div>
   </section>
 
@@ -726,7 +726,7 @@
   var PROP={phi:'Porosity',k:'Permeability'};
   var SETS={fwd:{phi:'fphi',k:'fk'},inv:{phi:'phif'}};
   var st={dir:'fwd',prop:'phi',n:0,up:null};
-  var SPACE='https://aljaser2030-geopix-ai.hf.space',canUp=function(){return st.dir==='fwd'};
+  var SPACE='https://aljaser2030-geopix-ai.hf.space',canUp=function(){return st.dir==='fwd'&&st.prop==='phi'};
   var ramp=function(p){return '<span>'+PROP[p]+'</span><span>Low<i class="ramp" style="background:'+JET+'"></i>High</span>'};
   var cmp=$('#cmp'),cr=$('#cmpR'),cv=$('#cmpV');
   var setX=function(v){cr.value=v;cmp.style.setProperty('--pos',v+'%')},setY=function(v){cv.value=v;cmp.style.setProperty('--vpos',v+'%')};
@@ -744,7 +744,7 @@
     var strip=$('#strip');strip.innerHTML='';
     PICK.forEach(function(sn,i){var b=document.createElement('button');b.type='button';b.setAttribute('aria-label','Example '+(i+1));b.setAttribute('aria-pressed',String(i===st.n));
       b.setAttribute('aria-pressed',String(i===st.n&&!st.up));b.innerHTML='<b>'+(i+1)+'</b><img src="assets/demo/'+set+'/'+(sn<10?'0':'')+sn+'i.jpg" alt="">';b.onclick=function(){st.n=i;st.up=null;render();run()};strip.appendChild(b)});
-    strip.classList.add('up6');var u=document.createElement('button');u.type='button';u.className='upl';u.setAttribute('aria-pressed',String(!!st.up));u.disabled=!canUp();u.title=canUp()?'Upload your own facies map':'Live upload: Facies → Properties';u.innerHTML=st.up?'<img src="'+st.up.fac+'" alt="">':'<div><span>+</span>Your map</div>';u.onclick=function(){$('#upFile').click()};strip.appendChild(u);
+    strip.classList.add('up6');var u=document.createElement('button');u.type='button';u.className='upl';u.setAttribute('aria-pressed',String(!!st.up));u.disabled=!canUp();u.title=canUp()?'Upload your own facies map':'Live upload: Facies → Porosity (permeability coming soon)';u.innerHTML=st.up?'<img src="'+st.up.fac+'" alt="">':'<div><span>+</span>Your map</div>';u.onclick=function(){$('#upFile').click()};strip.appendChild(u);
     document.querySelectorAll('.seg button').forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.dir===st.dir))});
     document.querySelectorAll('#props .pill').forEach(function(b){var ok=!!SETS[st.dir][b.dataset.p];b.disabled=!ok;b.title=ok?'':'Coming soon';b.setAttribute('aria-pressed',String(b.dataset.p===st.prop))});
   }
@@ -767,7 +767,7 @@
   $('#upFile').addEventListener('change',function(e){var f=e.target.files[0];e.target.value='';if(!f)return;
     if(f.size>15e6){$('#status').textContent='That file is over 15 MB. Please use a smaller image.';return}
     if(st.up&&st.up.fac)URL.revokeObjectURL(st.up.fac);st.up={file:f,fac:URL.createObjectURL(f),out:null};setX(50);render();setY(100);live()});
-  $('#upGo').addEventListener('click',function(){st.dir='fwd';render();setTimeout(function(){$('#upFile').click()},450)});
+  $('#upGo').addEventListener('click',function(){st.dir='fwd';st.prop='phi';render();setTimeout(function(){$('#upFile').click()},450)});
   function run(){ if(running)return;if(st.up){live();return}running=true;var btn=$('#runBtn');btn.disabled=true;$('#status').textContent='Generating…';setX(50);
     if(reduce){setY(30);done();return}
     var t0=performance.now(),T=1500;setY(100);
